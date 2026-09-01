@@ -12,16 +12,15 @@ namespace DbContext.Migrations.SqlServerDbContext
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Quotes",
+                name: "Attractions",
                 columns: table => new
                 {
-                    QuoteId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    QuoteText = table.Column<string>(type: "varchar(200)", nullable: true),
-                    Author = table.Column<string>(type: "varchar(200)", nullable: true)
+                    AttractionsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "varchar(200)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Quotes", x => x.QuoteId);
+                    table.PrimaryKey("PK_Attractions", x => x.AttractionsId);
                 });
         }
 
@@ -29,7 +28,7 @@ namespace DbContext.Migrations.SqlServerDbContext
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Quotes");
+                name: "Attractions");
         }
     }
 }

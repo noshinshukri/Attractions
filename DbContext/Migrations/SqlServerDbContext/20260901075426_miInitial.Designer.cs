@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DbContext.Migrations.SqlServerDbContext
 {
     [DbContext(typeof(MainDbContext.SqlServerDbContext))]
-    [Migration("20260730133711_miInitial")]
+    [Migration("20260901075426_miInitial")]
     partial class miInitial
     {
         /// <inheritdoc />
@@ -25,21 +25,18 @@ namespace DbContext.Migrations.SqlServerDbContext
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("DbModels.QuoteDbM", b =>
+            modelBuilder.Entity("DbModels.DbAttractions", b =>
                 {
-                    b.Property<Guid>("QuoteId")
+                    b.Property<Guid>("AttractionsId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Author")
+                    b.Property<string>("Name")
                         .HasColumnType("varchar(200)");
 
-                    b.Property<string>("QuoteText")
-                        .HasColumnType("varchar(200)");
+                    b.HasKey("AttractionsId");
 
-                    b.HasKey("QuoteId");
-
-                    b.ToTable("Quotes");
+                    b.ToTable("Attractions");
                 });
 #pragma warning restore 612, 618
         }

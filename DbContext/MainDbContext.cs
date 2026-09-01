@@ -24,7 +24,7 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
 #endif
 
     #region C# model of database tables
-    public DbSet<QuoteDbM> Quotes { get; set; }
+    public DbSet<DbAttractions> Attractions { get; set; }
     #endregion
 
     #region constructors

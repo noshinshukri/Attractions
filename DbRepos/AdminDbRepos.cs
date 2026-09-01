@@ -1,8 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
-using System.Data;
-
-using Seido.Utilities.SeedGenerator;
 using DbModels;
 using DbContext;
 using Configuration;
@@ -11,25 +7,25 @@ namespace DbRepos;
 
 public class AdminDbRepos
 {
-    private const string _seedSource = "./app-seeds.json";
     private readonly ILogger<AdminDbRepos> _logger;
-    private Encryptions _encryptions;
+    private readonly Encryptions _encryptions;
     private readonly MainDbContext _dbContext;
 
     public async Task SeedAsync(int nrItems)
     {
-        //Create a seeder
-        var fn = Path.GetFullPath(_seedSource);
-        var seeder = new SeedGenerator(fn);
+        var safeCount = Math.Max(1, nrItems);
 
-        //remove existing quotes in the database
-        _dbContext.Quotes.RemoveRange(_dbContext.Quotes);
+        _dbContext.Attractions.RemoveRange(_dbContext.Attractions);
 
-        //Seeding new quotes into the database
-        var quotes = seeder.AllQuotes.Select(q => new QuoteDbM(q)).ToList();
-        _dbContext.Quotes.AddRange(quotes);
+        var attractions = Enumerable.Range(1, safeCount)
+            .Select(i => new DbAttractions
+            {
+                AttractionsId = Guid.NewGuid(),
+                Name = $"Attraction {i}"
+            })
+            .ToList();
 
-        //Save changes to the database
+        _dbContext.Attractions.AddRange(attractions);
         await _dbContext.SaveChangesAsync();
     }
 
