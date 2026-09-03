@@ -15,17 +15,17 @@ public class AdminDbRepos
     {
         var safeCount = Math.Max(1, nrItems);
 
-        _dbContext.Attractions.RemoveRange(_dbContext.Attractions);
+        _dbContext.Attraction.RemoveRange(_dbContext.Attraction);
 
         var attractions = Enumerable.Range(1, safeCount)
-            .Select(i => new DbAttractions
+            .Select(i => new DbAttraction
             {
-                AttractionsId = Guid.NewGuid(),
+                AttractionId = Guid.NewGuid(),
                 Name = $"Attraction {i}"
             })
             .ToList();
 
-        _dbContext.Attractions.AddRange(attractions);
+        _dbContext.Attraction.AddRange(attractions);
         await _dbContext.SaveChangesAsync();
     }
 

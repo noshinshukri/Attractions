@@ -55,8 +55,12 @@ builder.Services.AddInMemoryLogger();
 
 //Inject DbRepos and Services
 builder.Services.AddScoped<AdminDbRepos>();
+builder.Services.AddScoped<AttractionDbRepos>();
+builder.Services.AddScoped<CommentDbRepos>();
 
 builder.Services.AddScoped<IAdminService, AdminServiceDb>();
+builder.Services.AddScoped<IAttractionService, AttractionDbService>();
+builder.Services.AddScoped<ICommentService, CommentDbService>();
 
 var app = builder.Build();
 
