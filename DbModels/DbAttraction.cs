@@ -12,11 +12,11 @@ namespace DbModels;
 public sealed class DbAttraction : Attraction
 {
     [Key]
-    public Guid AttractionId { get; set; }
-    public string Name { get; set; }
+    public override Guid AttractionId { get; set; }
+    public override string Name { get; set; }
     [NotMapped]
-    public override List<IComment> Comments { get => DbComments.ToList<IComment>(); set => throw new NotImplementedException(); }
-    public List<DbComment> DbComments { get; set; } = null;
+    public override List<IReview> Reviews { get => DbReview.ToList<IReview>(); set => throw new NotImplementedException(); }
+    public List<DbReview> DbReview { get; set; } = null;
 
 }
 

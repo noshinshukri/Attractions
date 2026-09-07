@@ -12,10 +12,10 @@ namespace DbModels;
 public sealed class DbComment : Comment
 {
     [Key]
-    public Guid CommentsId { get; set; }
-    public string CommentText { get; set; }
+    public override Guid CommentId { get; set; }
+    public override string CommentText { get; set; }
     [NotMapped]
     public override IAttraction Attraction { get => DbAttraction; set => throw new NotImplementedException(); }
-    public DbAttraction DbAttraction { get; set; } = null;
+    public DbAttraction DbAttraction { get; set; }
 
 }

@@ -6,7 +6,7 @@ using Services;
 
 namespace Services;
 
-public class UserDbService : IUserDbService
+public class UserDbService : IUserService
 {
     private readonly UserDbRepos _repo = null;
     private readonly ILogger<UserDbService> _logger = null;

@@ -4,9 +4,9 @@ namespace Models;
 
 public class Attraction : IAttraction
 {
-    public Guid AttractionId { get; set; }
-    public string Name { get; set; }
+    public virtual Guid AttractionId { get; set; }
+    public virtual string Name { get; set; }
 
-    public virtual List<IComment> Comments { get; set; } = null;
+    public virtual List<IReview> Reviews { get; set; } = null;
 
 }

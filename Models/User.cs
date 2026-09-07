@@ -1,8 +1,12 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Models;
 
 public class User : IUser
 {
-    public Guid UserId { get; set; }
-    public string UserName { get; set; }
-    public string Email { get; set; }
+    public virtual Guid UserId { get; set; }
+    public virtual string UserName { get; set; }
+    public virtual string Email { get; set; }
+
+    public virtual List<IReview> Reviews { get; set; } = null;
 }

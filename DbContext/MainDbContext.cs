@@ -26,6 +26,8 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
     #region C# model of database tables
     public DbSet<DbAttraction> Attraction { get; set; }
     public DbSet<DbComment> Comment { get; set; }
+    public DbSet<DbUser> User { get; set; }
+    public DbSet<DbReview> Review { get; set; }
     #endregion
 
     #region constructors
