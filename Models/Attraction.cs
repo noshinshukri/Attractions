@@ -8,5 +8,6 @@ public class Attraction : IAttraction
     public virtual string Name { get; set; }
 
     public virtual List<IReview> Reviews { get; set; } = null;
+    public virtual List<ICategory> Categories { get; set; } = null;
 
 }

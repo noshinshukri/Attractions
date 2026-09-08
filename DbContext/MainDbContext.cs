@@ -28,6 +28,10 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
     public DbSet<DbComment> Comment { get; set; }
     public DbSet<DbUser> User { get; set; }
     public DbSet<DbReview> Review { get; set; }
+    public DbSet<DbCity> City { get; set; }
+    public DbSet<DbCountry> Country { get; set; }
+    public DbSet<DbAddress> Address { get; set; }
+    public DbSet<DbCategory> Category { get; set; }
     #endregion
 
     #region constructors
