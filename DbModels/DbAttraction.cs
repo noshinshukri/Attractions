@@ -14,9 +14,10 @@ public sealed class DbAttraction : Attraction
     [Key]
     public override Guid AttractionId { get; set; }
     public override string Name { get; set; }
+
     [NotMapped]
-    public override List<IReview> Reviews { get => DbReview.ToList<IReview>(); set => throw new NotImplementedException(); }
-    public List<DbReview> DbReview { get; set; } = null;
+    public override List<IReview> Reviews { get => DbReviews.ToList<IReview>(); set => throw new NotImplementedException(); }
+    public List<DbReview> DbReviews { get; set; } = new();
 
 }
 

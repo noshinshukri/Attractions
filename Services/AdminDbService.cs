@@ -4,19 +4,19 @@ using DbRepos;
 
 namespace Services;
     
-public class AdminServiceDb : IAdminService
+public class AdminDbService : IAdminService
 {
     private readonly AdminDbRepos _repo = null;
-    private readonly ILogger<AdminServiceDb> _logger = null;
+    private readonly ILogger<AdminDbService> _logger = null;
 
     public Task SeedAsync(int nrItems) => _repo.SeedAsync(nrItems);
 
     #region constructors
-    public AdminServiceDb(AdminDbRepos repo)
+    public AdminDbService(AdminDbRepos repo)
     {
         _repo = repo;
     }
-    public AdminServiceDb(AdminDbRepos repo, ILogger<AdminServiceDb> logger):this(repo)
+    public AdminDbService(AdminDbRepos repo, ILogger<AdminDbService> logger):this(repo)
     {
         _logger = logger;
     }

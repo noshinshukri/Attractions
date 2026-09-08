@@ -24,15 +24,13 @@ public sealed class DbReview : Review
 
     [NotMapped]
     public override IUser User { get => DbUser; set => throw new NotImplementedException(); }
-    public Guid UserId { get; set; }
-    [ForeignKey("UserId")]
     public DbUser DbUser { get; set; }
 
 
     [NotMapped]
-    public override IComment? Comment { get => DbComment; set => throw new NotImplementedException(); }
+    public override IComment Comment { get => DbComment; set => throw new NotImplementedException(); }
     [ForeignKey("CommentId")]
-    public DbComment? DbComment { get; set; }
+    public DbComment DbComment { get; set; }
 
 
     public override ReviewRating Rating { get; set; }

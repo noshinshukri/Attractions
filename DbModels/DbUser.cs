@@ -19,7 +19,8 @@ public sealed class DbUser : User
 
 
     [NotMapped]
-    public override List<IReview> Reviews { get => new List<IReview> { DbReview }; set => throw new NotImplementedException(); }
-    public DbReview DbReview { get; set; } = null;
+    public override List<IReview> Reviews { get => DbReviews.ToList<IReview>(); set => throw new NotImplementedException(); }
+
+    public List<DbReview> DbReviews { get; set; } = new();
 
 }
