@@ -7,6 +7,7 @@ using Services;
 using Configuration;
 using Configuration.Options;
 using Microsoft.Extensions.Options;
+using Models.DTO;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -65,16 +66,17 @@ namespace AppWebApi.Controllers
         //GET: api/admin/seed?count={count}
         [HttpGet()]
         [ActionName("Seed")]
-        [ProducesResponseType(200, Type = typeof(string))]
+        [ProducesResponseType(200, Type = typeof(GstUsrInfoAllDto))]
         [ProducesResponseType(400, Type = typeof(string))]
-       public async Task<IActionResult> Seed(int nrItems = 10)
+        public async Task<IActionResult> Seed(string count = "100")
         {
             try
             {
-                _logger.LogInformation($"{nameof(Seed)}");
-                await _service.SeedAsync(nrItems);
+                int countArg = int.Parse(count);
 
-                return Ok($"Seeded {nrItems} items successfully");
+                _logger.LogInformation($"{nameof(Seed)}: {nameof(countArg)}: {countArg}");
+                var info = await _service.SeedAsync(countArg);
+                return Ok(info);
             }
             catch (Exception ex)
             {

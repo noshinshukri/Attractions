@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 
 using DbRepos;
+using Models.DTO;
 
 namespace Services;
     
@@ -8,8 +9,6 @@ public class AdminDbService : IAdminService
 {
     private readonly AdminDbRepos _repo = null;
     private readonly ILogger<AdminDbService> _logger = null;
-
-    public Task SeedAsync(int nrItems) => _repo.SeedAsync(nrItems);
 
     #region constructors
     public AdminDbService(AdminDbRepos repo)
@@ -21,5 +20,10 @@ public class AdminDbService : IAdminService
         _logger = logger;
     }
     #endregion
+
+        //Simple 1:1 calls in this case, but as Services expands, this will no longer need to be the case
+    public Task<ResponseItemDto<GstUsrInfoAllDto>> GuestInfoAsync() => _repo.InfoAsync();
+    public Task<ResponseItemDto<GstUsrInfoAllDto>> SeedAsync(int nrOfItems) => _repo.SeedAsync(nrOfItems);
+    //public Task<ResponseItemDto<GstUsrInfoAllDto>> RemoveSeedAsync(bool seeded) => _repo.RemoveSeedAsync(seeded);
 }
 

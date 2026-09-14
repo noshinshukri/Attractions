@@ -17,5 +17,6 @@ public sealed class DbCategory : Category
 
     [NotMapped]
     public override List<IAttraction> Attractions { get => DbAttractions.ToList<IAttraction>(); set => throw new NotImplementedException(); }
+    [JsonIgnore]
     public List<DbAttraction> DbAttractions { get; set; } = new();
 }

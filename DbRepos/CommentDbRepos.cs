@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 
 using Models;
+using Models.DTO;
 using DbModels;
 using DbContext;
 
@@ -17,5 +18,19 @@ public class CommentDbRepos
     {
         _logger = logger;
         _dbContext = context;
+    }
+
+                public async Task<ResponsePageDto<IComment>> ReadCommentsAsync()
+    {
+        IQueryable<DbComment> query = _dbContext.Comment.AsNoTracking();
+        var ret = new ResponsePageDto<IComment>()
+        {
+#if DEBUG
+            ConnectionString = _dbContext.dbConnection,
+#endif
+            DbItemsCount = await query.CountAsync(),
+            PageItems = await query.ToListAsync<IComment>(),
+        };
+        return ret;
     }
 }

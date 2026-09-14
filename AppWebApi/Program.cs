@@ -57,10 +57,12 @@ builder.Services.AddInMemoryLogger();
 builder.Services.AddScoped<AdminDbRepos>();
 builder.Services.AddScoped<AttractionDbRepos>();
 builder.Services.AddScoped<CommentDbRepos>();
+builder.Services.AddScoped<CountryDbRepos>();
 
 builder.Services.AddScoped<IAdminService, AdminDbService>();
 builder.Services.AddScoped<IAttractionService, AttractionDbService>();
 builder.Services.AddScoped<ICommentService, CommentDbService>();
+builder.Services.AddScoped<ICountryService, CountryDbService>();
 
 var app = builder.Build();
 
@@ -71,7 +73,7 @@ var app = builder.Build();
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Seido Friends API v2.0");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Seido Friends API v1");
     });
 }
 

@@ -1,6 +1,9 @@
 namespace Services;
+using Models.DTO;
 
 public interface IAdminService
 {
-    public Task SeedAsync(int nrItems);
+    public Task<ResponseItemDto<GstUsrInfoAllDto>> GuestInfoAsync();
+    public Task<ResponseItemDto<GstUsrInfoAllDto>> SeedAsync(int nrOfItems);
+    //public Task<ResponseItemDto<GstUsrInfoAllDto>> RemoveSeedAsync(bool seeded);
 }

@@ -29,7 +29,8 @@ namespace DbContext.Migrations.SqlServerDbContext
                 columns: table => new
                 {
                     CountryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CountryName = table.Column<string>(type: "varchar(200)", nullable: true)
+                    CountryName = table.Column<string>(type: "varchar(200)", nullable: true),
+                    Seeded = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -42,7 +43,8 @@ namespace DbContext.Migrations.SqlServerDbContext
                 {
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserName = table.Column<string>(type: "varchar(200)", nullable: true),
-                    Email = table.Column<string>(type: "varchar(200)", nullable: true)
+                    Email = table.Column<string>(type: "varchar(200)", nullable: true),
+                    Seeded = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -55,7 +57,8 @@ namespace DbContext.Migrations.SqlServerDbContext
                 {
                     CityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CityName = table.Column<string>(type: "varchar(200)", nullable: true),
-                    DbCountryCountryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    DbCountryCountryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Seeded = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -114,7 +117,8 @@ namespace DbContext.Migrations.SqlServerDbContext
                 {
                     CommentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CommentText = table.Column<string>(type: "varchar(200)", nullable: true),
-                    DbAttractionAttractionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    DbAttractionAttractionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Seeded = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {

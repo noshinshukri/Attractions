@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 
 using Models;
+using Models.DTO;
 using DbRepos;
 using Services;
 
@@ -19,4 +20,6 @@ public class CommentDbService : ICommentService
     {
         _logger = logger;
     }
+
+        public Task<ResponsePageDto<IComment>> ReadCommentsAsync() => _repo.ReadCommentsAsync();
 }

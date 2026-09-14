@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 
 using Models;
+using Models.DTO;
 using DbRepos;
 using Services;
 
@@ -19,4 +20,7 @@ public class CityDbService : ICityService
     {
         _logger = logger;
     }
+
+    public Task<ResponsePageDto<ICity>> ReadCitiesAsync() => _repo.ReadCitiesAsync();
+
 }

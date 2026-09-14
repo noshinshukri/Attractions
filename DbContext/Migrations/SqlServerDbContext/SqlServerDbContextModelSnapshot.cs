@@ -105,6 +105,9 @@ namespace DbContext.Migrations.SqlServerDbContext
                     b.Property<Guid?>("DbCountryCountryId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("Seeded")
+                        .HasColumnType("bit");
+
                     b.HasKey("CityId");
 
                     b.HasIndex("DbCountryCountryId");
@@ -124,6 +127,9 @@ namespace DbContext.Migrations.SqlServerDbContext
                     b.Property<Guid?>("DbAttractionAttractionId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("Seeded")
+                        .HasColumnType("bit");
+
                     b.HasKey("CommentId");
 
                     b.HasIndex("DbAttractionAttractionId");
@@ -139,6 +145,9 @@ namespace DbContext.Migrations.SqlServerDbContext
 
                     b.Property<string>("CountryName")
                         .HasColumnType("varchar(200)");
+
+                    b.Property<bool>("Seeded")
+                        .HasColumnType("bit");
 
                     b.HasKey("CountryId");
 
@@ -185,6 +194,9 @@ namespace DbContext.Migrations.SqlServerDbContext
 
                     b.Property<string>("Email")
                         .HasColumnType("varchar(200)");
+
+                    b.Property<bool>("Seeded")
+                        .HasColumnType("bit");
 
                     b.Property<string>("UserName")
                         .HasColumnType("varchar(200)");
@@ -233,9 +245,11 @@ namespace DbContext.Migrations.SqlServerDbContext
 
             modelBuilder.Entity("DbModels.DbCity", b =>
                 {
-                    b.HasOne("DbModels.DbCountry", null)
+                    b.HasOne("DbModels.DbCountry", "DbCountry")
                         .WithMany("DbCities")
                         .HasForeignKey("DbCountryCountryId");
+
+                    b.Navigation("DbCountry");
                 });
 
             modelBuilder.Entity("DbModels.DbComment", b =>

@@ -17,10 +17,12 @@ public sealed class DbAttraction : Attraction
 
     [NotMapped]
     public override List<IReview> Reviews { get => DbReviews.ToList<IReview>(); set => throw new NotImplementedException(); }
+    [JsonIgnore]
     public List<DbReview> DbReviews { get; set; } = new();
 
     [NotMapped]
     public override List<ICategory> Categories { get => DbCategories.ToList<ICategory>(); set => throw new NotImplementedException(); }
+    [JsonIgnore]
     public List<DbCategory> DbCategories { get; set; } = new();
 
 }

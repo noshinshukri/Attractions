@@ -9,13 +9,20 @@ using Models;
 
 namespace DbModels;
 
-public sealed class DbComment : Comment
+public sealed class DbComment : Comment, ISeed<DbComment>
 {
     [Key]
     public override Guid CommentId { get; set; }
     public override string CommentText { get; set; }
     [NotMapped]
     public override IAttraction Attraction { get => DbAttraction; set => throw new NotImplementedException(); }
+    [JsonIgnore]
     public DbAttraction DbAttraction { get; set; }
+
+    public override DbComment Seed(SeedGenerator seedGenerator)
+    {
+        base.Seed(seedGenerator);
+        return this;
+    }
 
 }
