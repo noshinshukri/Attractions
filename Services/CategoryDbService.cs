@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 
 using Models;
+using Models.DTO;
 using DbRepos;
 using Services;
 
@@ -19,4 +20,8 @@ public class CategoryDbService : ICategoryService
     {
         _logger = logger;
     }
+
+    public Task<ResponsePageDto<ICategory>> ReadCategoriesAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize) => _repo.ReadCategoriesAsync(seeded, flat, filter, pageNumber, pageSize);
+    public Task<ResponseItemDto<ICategory>> ReadCategoryAsync(Guid id, bool flat) => _repo.ReadCategoryAsync(id, flat);
+    public Task<ICategory> DeleteCategoryAsync(Guid id) => _repo.DeleteCategoryAsync(id);
 }

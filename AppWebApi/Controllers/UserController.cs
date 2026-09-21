@@ -12,14 +12,14 @@ namespace AppWebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]/[action]")]
-    public class AttractionController : Controller
+    public class UserController : Controller
     {
-        readonly IAttractionService _service = null;
-        readonly ILogger<AttractionController> _logger = null;
+        readonly IUserService _service = null;
+        readonly ILogger<UserController> _logger = null;
 
         [HttpGet()]
         [ActionName("Read")]
-        [ProducesResponseType(200, Type = typeof(ResponsePageDto<IAttraction>))]
+        [ProducesResponseType(200, Type = typeof(ResponsePageDto<IUser>))]
         [ProducesResponseType(400, Type = typeof(string))]
         public async Task<IActionResult> Read(string seeded = "true", string flat = "true",
             string filter = null, string pageNr = "0", string pageSize = "10")
@@ -34,7 +34,7 @@ namespace AppWebApi.Controllers
                  _logger.LogInformation($"{nameof(Read)}: {nameof(seededArg)}: {seededArg}, {nameof(flatArg)}: {flatArg}, " +
                     $"{nameof(pageNrArg)}: {pageNrArg}, {nameof(pageSizeArg)}: {pageSizeArg}");
 
-                var resp = await _service.ReadAttractionsAsync(seededArg, flatArg, filter?.Trim().ToLower(), pageNrArg, pageSizeArg);     
+                var resp = await _service.ReadUsersAsync(seededArg, flatArg, filter?.Trim().ToLower(), pageNrArg, pageSizeArg);     
                 return Ok(resp);     
             }
             catch (Exception ex)
@@ -44,10 +44,10 @@ namespace AppWebApi.Controllers
             }
         }
 
-                //GET: api/Attraction/readitem
+                //GET: api/User/readitem
         [HttpGet()]
         [ActionName("ReadItem")]
-        [ProducesResponseType(200, Type = typeof(IAttraction))]
+        [ProducesResponseType(200, Type = typeof(IUser))]
         [ProducesResponseType(400, Type = typeof(string))]
         [ProducesResponseType(404, Type = typeof(string))]
         public async Task<IActionResult> ReadItem(string id = null, string flat = "false")
@@ -59,7 +59,7 @@ namespace AppWebApi.Controllers
 
                 _logger.LogInformation($"{nameof(ReadItem)}: {nameof(idArg)}: {idArg}, {nameof(flatArg)}: {flatArg}");
 
-                var item = await _service.ReadAttractionAsync(idArg, flatArg);
+                var item = await _service.ReadUserAsync(idArg, flatArg);
                 if (item == null) throw new ArgumentException ($"Item with id {id} does not exist");
 
                 
@@ -72,10 +72,10 @@ namespace AppWebApi.Controllers
             }
         }
         
-        //DELETE: api/Attraction/deleteitem/id
+        //DELETE: api/User/deleteitem/id
         [HttpDelete("{id}")]
         [ActionName("DeleteItem")]
-        [ProducesResponseType(200, Type = typeof(IAttraction))]
+        [ProducesResponseType(200, Type = typeof(IUser))]
         [ProducesResponseType(400, Type = typeof(string))]
         public async Task<IActionResult> DeleteItem(string id)
         {
@@ -85,7 +85,7 @@ namespace AppWebApi.Controllers
 
                 _logger.LogInformation($"{nameof(DeleteItem)}: {nameof(idArg)}: {idArg}");
 
-                var item = await _service.DeleteAttractionAsync(idArg);
+                var item = await _service.DeleteUserAsync(idArg);
                 if (item == null) throw new ArgumentException ($"Item with id {id} does not exist");
 
                 _logger.LogInformation($"item {idArg} deleted");
@@ -99,7 +99,7 @@ namespace AppWebApi.Controllers
             }
         }
 
-        public AttractionController(IAttractionService service, ILogger<AttractionController> logger)
+        public UserController(IUserService service, ILogger<UserController> logger)
         {
             _service = service;
             _logger = logger;

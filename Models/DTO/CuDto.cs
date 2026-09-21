@@ -89,7 +89,7 @@ public class AttractionCuDto
         AttractionId = org.AttractionId;
         Name = org.Name;
         ReviewsId = org.Reviews?.Select(r => r.ReviewId).ToList();
-        //CategoriesId = org.Categories?.Select(c => c.CategoryId).ToList();
+        CategoriesId = org.Categories?.Select(c => c.CategoryId).ToList();
     }
 }
 
