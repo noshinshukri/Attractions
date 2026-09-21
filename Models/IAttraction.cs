@@ -6,5 +6,6 @@ public interface IAttraction
     public string Name { get; set; }
     public List<IReview> Reviews { get; set; }
     public List<ICategory> Categories { get; set; }
+    public IAddress Address { get; set; }
 
 }

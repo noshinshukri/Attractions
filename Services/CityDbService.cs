@@ -21,6 +21,8 @@ public class CityDbService : ICityService
         _logger = logger;
     }
 
-    public Task<ResponsePageDto<ICity>> ReadCitiesAsync() => _repo.ReadCitiesAsync();
+    public Task<ResponsePageDto<ICity>> ReadCitiesAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize) => _repo.ReadCitiesAsync(seeded, flat, filter, pageNumber, pageSize);
+    public Task<ResponseItemDto<ICity>> ReadCityAsync(Guid id, bool flat) => _repo.ReadCityAsync(id, flat);
+    public Task<ICity> DeleteCityAsync(Guid id) => _repo.DeleteCityAsync(id);
 
 }

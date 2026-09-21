@@ -49,6 +49,9 @@ namespace DbContext.Migrations.SqlServerDbContext
                     b.Property<Guid?>("DbCountryCountryId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("Seeded")
+                        .HasColumnType("bit");
+
                     b.HasKey("AddressId");
 
                     b.HasIndex("DbCityCityId");
@@ -64,15 +67,18 @@ namespace DbContext.Migrations.SqlServerDbContext
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("DbCityCityId")
+                    b.Property<Guid?>("AdressId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .HasColumnType("varchar(200)");
 
+                    b.Property<bool>("Seeded")
+                        .HasColumnType("bit");
+
                     b.HasKey("AttractionId");
 
-                    b.HasIndex("DbCityCityId");
+                    b.HasIndex("AdressId");
 
                     b.ToTable("Attraction");
                 });
@@ -175,6 +181,9 @@ namespace DbContext.Migrations.SqlServerDbContext
                     b.Property<int>("Rating")
                         .HasColumnType("int");
 
+                    b.Property<bool>("Seeded")
+                        .HasColumnType("bit");
+
                     b.HasKey("ReviewId");
 
                     b.HasIndex("AttractionId");
@@ -238,9 +247,11 @@ namespace DbContext.Migrations.SqlServerDbContext
 
             modelBuilder.Entity("DbModels.DbAttraction", b =>
                 {
-                    b.HasOne("DbModels.DbCity", null)
+                    b.HasOne("DbModels.DbAddress", "DbAddress")
                         .WithMany("DbAttractions")
-                        .HasForeignKey("DbCityCityId");
+                        .HasForeignKey("AdressId");
+
+                    b.Navigation("DbAddress");
                 });
 
             modelBuilder.Entity("DbModels.DbCity", b =>
@@ -282,14 +293,14 @@ namespace DbContext.Migrations.SqlServerDbContext
                     b.Navigation("DbUser");
                 });
 
+            modelBuilder.Entity("DbModels.DbAddress", b =>
+                {
+                    b.Navigation("DbAttractions");
+                });
+
             modelBuilder.Entity("DbModels.DbAttraction", b =>
                 {
                     b.Navigation("DbReviews");
-                });
-
-            modelBuilder.Entity("DbModels.DbCity", b =>
-                {
-                    b.Navigation("DbAttractions");
                 });
 
             modelBuilder.Entity("DbModels.DbCountry", b =>

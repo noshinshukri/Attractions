@@ -7,7 +7,7 @@ using Models;
 namespace DbModels;
 
 
-public sealed class DbAddress : Address
+public sealed class DbAddress : Address, ISeed<DbAddress>
 {
     [Key]
     public override Guid AddressId { get; set; }
@@ -21,6 +21,18 @@ public sealed class DbAddress : Address
     public override ICountry Country { get => DbCountry; set => throw new NotImplementedException(); }
     [JsonIgnore]
     public DbCountry DbCountry { get; set; }
+
+    [NotMapped]
+    public override List<IAttraction> Attractions { get => DbAttractions.ToList<IAttraction>(); set => throw new NotImplementedException(); }
+    [JsonIgnore]
+    public List<DbAttraction> DbAttractions { get; set; } = new();
+    
+
+    public override DbAddress Seed(SeedGenerator seedGenerator)
+    {
+        base.Seed(seedGenerator);
+        return this;
+    }
 
 
 }

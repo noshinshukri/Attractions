@@ -58,11 +58,13 @@ builder.Services.AddScoped<AdminDbRepos>();
 builder.Services.AddScoped<AttractionDbRepos>();
 builder.Services.AddScoped<CommentDbRepos>();
 builder.Services.AddScoped<CountryDbRepos>();
+builder.Services.AddScoped<CityDbRepos>();
 
 builder.Services.AddScoped<IAdminService, AdminDbService>();
 builder.Services.AddScoped<IAttractionService, AttractionDbService>();
 builder.Services.AddScoped<ICommentService, CommentDbService>();
 builder.Services.AddScoped<ICountryService, CountryDbService>();
+builder.Services.AddScoped<ICityService, CityDbService>();
 
 var app = builder.Build();
 

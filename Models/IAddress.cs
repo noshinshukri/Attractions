@@ -9,4 +9,6 @@ public interface IAddress
     public ICity City { get; set; }
     public ICountry Country { get; set; }
 
+    public List<IAttraction> Attractions { get; set; }
+
 }

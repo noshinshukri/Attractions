@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Seido.Utilities.SeedGenerator;
 
 namespace Models;
 
@@ -12,7 +13,7 @@ public enum ReviewRating
 }
 
 
-public class Review : IReview
+public class Review : IReview, ISeed<Review>
 {
     public virtual Guid ReviewId { get; set; }
     public virtual IAttraction Attraction { get; set; }
@@ -20,5 +21,13 @@ public class Review : IReview
     public virtual IComment? Comment { get; set; }
     public virtual ReviewRating Rating { get; set; }
     public virtual DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public bool Seeded { get; set; } = false;
+    public virtual Review Seed(SeedGenerator seedGenerator)
+    {
+        ReviewId = Guid.NewGuid();
+        Rating = (ReviewRating)seedGenerator.Next(1, 6);
+        CreatedAt = DateTime.UtcNow;
+        return this;
+    }
     
 }

@@ -9,7 +9,7 @@ using Models;
 
 namespace DbModels;
 
-public sealed class DbUser : User
+public sealed class DbUser : User, ISeed<DbUser>
 {
     [Key]
     public override Guid UserId { get; set; }
@@ -20,7 +20,13 @@ public sealed class DbUser : User
 
     [NotMapped]
     public override List<IReview> Reviews { get => DbReviews.ToList<IReview>(); set => throw new NotImplementedException(); }
-
+    [JsonIgnore]
     public List<DbReview> DbReviews { get; set; } = new();
+
+        public override DbUser Seed(SeedGenerator seedGenerator)
+    {
+        base.Seed(seedGenerator);
+        return this;
+    }
 
 }

@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
 
 using Models;
+using Models.DTO;
 using Services;
 using Microsoft.AspNetCore.Authorization;
-using Models.DTO;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -12,14 +12,14 @@ namespace AppWebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]/[action]")]
-    public class CommentsController : Controller
+    public class CityController : Controller
     {
-        readonly ICommentService _service = null;
-        readonly ILogger<CommentsController> _logger = null;
+        readonly ICityService _service = null;
+        readonly ILogger<CityController> _logger = null;
 
         [HttpGet()]
         [ActionName("Read")]
-        [ProducesResponseType(200, Type = typeof(ResponsePageDto<IComment>))]
+        [ProducesResponseType(200, Type = typeof(ResponsePageDto<ICity>))]
         [ProducesResponseType(400, Type = typeof(string))]
         public async Task<IActionResult> Read(string seeded = "true", string flat = "true",
             string filter = null, string pageNr = "0", string pageSize = "10")
@@ -34,7 +34,7 @@ namespace AppWebApi.Controllers
                  _logger.LogInformation($"{nameof(Read)}: {nameof(seededArg)}: {seededArg}, {nameof(flatArg)}: {flatArg}, " +
                     $"{nameof(pageNrArg)}: {pageNrArg}, {nameof(pageSizeArg)}: {pageSizeArg}");
 
-                var resp = await _service.ReadCommentsAsync(seededArg, flatArg, filter?.Trim().ToLower(), pageNrArg, pageSizeArg);     
+                var resp = await _service.ReadCitiesAsync(seededArg, flatArg, filter?.Trim().ToLower(), pageNrArg, pageSizeArg);     
                 return Ok(resp);     
             }
             catch (Exception ex)
@@ -44,10 +44,10 @@ namespace AppWebApi.Controllers
             }
         }
 
-                //GET: api/comment/readitem
+                //GET: api/city/readitem
         [HttpGet()]
         [ActionName("ReadItem")]
-        [ProducesResponseType(200, Type = typeof(IComment))]
+        [ProducesResponseType(200, Type = typeof(ICity))]
         [ProducesResponseType(400, Type = typeof(string))]
         [ProducesResponseType(404, Type = typeof(string))]
         public async Task<IActionResult> ReadItem(string id = null, string flat = "false")
@@ -59,7 +59,7 @@ namespace AppWebApi.Controllers
 
                 _logger.LogInformation($"{nameof(ReadItem)}: {nameof(idArg)}: {idArg}, {nameof(flatArg)}: {flatArg}");
 
-                var item = await _service.ReadCommentAsync(idArg, flatArg);
+                var item = await _service.ReadCityAsync(idArg, flatArg);
                 if (item == null) throw new ArgumentException ($"Item with id {id} does not exist");
 
                 
@@ -72,7 +72,7 @@ namespace AppWebApi.Controllers
             }
         }
         
-        //DELETE: api/comment/deleteitem/id
+        //DELETE: api/city/deleteitem/id
         [HttpDelete("{id}")]
         [ActionName("DeleteItem")]
         [ProducesResponseType(200, Type = typeof(ICity))]
@@ -85,7 +85,7 @@ namespace AppWebApi.Controllers
 
                 _logger.LogInformation($"{nameof(DeleteItem)}: {nameof(idArg)}: {idArg}");
 
-                var item = await _service.DeleteCommentAsync(idArg);
+                var item = await _service.DeleteCityAsync(idArg);
                 if (item == null) throw new ArgumentException ($"Item with id {id} does not exist");
 
                 _logger.LogInformation($"item {idArg} deleted");
@@ -99,12 +99,10 @@ namespace AppWebApi.Controllers
             }
         }
 
-
-        public CommentsController(ICommentService service, ILogger<CommentsController> logger)
+        public CityController(ICityService service, ILogger<CityController> logger)
         {
             _service = service;
             _logger = logger;
         }
     }
 }
-

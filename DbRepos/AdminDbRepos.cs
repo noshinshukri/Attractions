@@ -49,8 +49,8 @@ public class AdminDbRepos
         var info = new GstUsrInfoAllDto();
         info.Db = new GstUsrInfoDbDto
         {
-            NrSeededAttraction = await _dbContext.Attraction.CountAsync(),
-            NrUnseededAttractions = 0,
+            NrSeededAttraction = await _dbContext.Attraction.Where(c => c.Seeded).CountAsync(),
+            NrUnseededAttractions = await _dbContext.Attraction.Where(c => !c.Seeded).CountAsync(),
             NrAttractionsWithAddress = 0,
 
             NrSeededCities = await _dbContext.City.Where(c => c.Seeded).CountAsync(),
@@ -61,6 +61,9 @@ public class AdminDbRepos
 
             NrSeededComments = await _dbContext.Comment.Where(c => c.Seeded).CountAsync(),
             NrUnseededComments = await _dbContext.Comment.Where(c => !c.Seeded).CountAsync(),
+
+            NrSeededUsers = await _dbContext.User.Where(c => c.Seeded).CountAsync(),
+            NrUnseededUsers = await _dbContext.User.Where(c => !c.Seeded).CountAsync(),
 
             NrSeededReviews = await _dbContext.Review.CountAsync(),
             NrUnseededReviews = 0,
@@ -93,13 +96,18 @@ public class AdminDbRepos
         //Generate the seeded data
         var countries = seeder.ItemsToList<DbCountry>(nrOfItems);
         var cities = seeder.ItemsToList<DbCity>(nrOfItems);
-        //var comments = seeder.ItemsToList<DbComment>(nrOfItems);
+        var addresses = seeder.ItemsToList<DbAddress>(nrOfItems);
+        var attractions = seeder.ItemsToList<DbAttraction>(nrOfItems);
+        var users = seeder.ItemsToList<DbUser>(nrOfItems);
+        var comments = seeder.ItemsToList<DbComment>(nrOfItems);
 
-        //var addresses = seeder.UniqueItemsToList<DbAddress>(nrOfItems);
+
         countries.ForEach(c => c.Seeded = true);
         cities.ForEach(c => c.Seeded = true);
-        //comments.ForEach(c => c.Seeded = true);
-
+        addresses.ForEach(a => a.Seeded = true);
+        users.ForEach(u => u.Seeded = true);
+        comments.ForEach(c => c.Seeded = true);
+        attractions.ForEach(a => a.Seeded = true);
         foreach (var country in countries)
         {
             for (int i = 0; i < 3; i++)
@@ -108,21 +116,25 @@ public class AdminDbRepos
 
                 country.DbCities.Add(city);
                 city.DbCountry = country;
+                
             }
         }
-        //Assign Address, Pets and Quotes to all the friends
-        /*foreach (var friend in friends)
+        foreach (var address in addresses)
         {
-            friend.AddressDbM = (seeder.Bool) ? seeder.FromList(addresses) : null;
-            friend.PetsDbM = seeder.ItemsToList<PetDbM>(seeder.Next(0, 4));
-            friend.QuotesDbM = seeder.UniqueItemsPickedFromList(seeder.Next(0, 6), quotes);
+            var city = seeder.FromList(cities);
+            
+
+            address.DbCity = city;
+            address.DbCountry = city.DbCountry;
         }
-        */
 
         //Note that all other tables are automatically set through FriendDbM Navigation properties
         _dbContext.Country.AddRange(countries);
         _dbContext.City.AddRange(cities);
-        //_dbContext.Comment.AddRange(comments);
+        _dbContext.Address.AddRange(addresses);
+        _dbContext.Attraction.AddRange(attractions);
+        _dbContext.Comment.AddRange(comments);
+        _dbContext.User.AddRange(users);
         LogChangeTracker();
         await _dbContext.SaveChangesAsync();
         LogChangeTracker();
@@ -133,9 +145,13 @@ public class AdminDbRepos
 
     public async Task<ResponseItemDto<GstUsrInfoAllDto>> RemoveSeedAsync(bool seeded)
     {
-        _dbContext.City.RemoveRange(_dbContext.City.Where(f => f.Seeded == seeded));
         _dbContext.Country.RemoveRange(_dbContext.Country.Where(f => f.Seeded == seeded));
-        //_dbContext.Comment.RemoveRange(_dbContext.Comment.Where(f => f.Seeded == seeded));
+        _dbContext.City.RemoveRange(_dbContext.City.Where(f => f.Seeded == seeded));
+        _dbContext.Address.RemoveRange(_dbContext.Address.Where(f => f.Seeded == seeded));
+        _dbContext.Attraction.RemoveRange(_dbContext.Attraction.Where(f => f.Seeded == seeded));
+        _dbContext.User.RemoveRange(_dbContext.User.Where(f => f.Seeded == seeded));
+        _dbContext.Comment.RemoveRange(_dbContext.Comment.Where(f => f.Seeded == seeded));
+        
 
         LogChangeTracker();
         await _dbContext.SaveChangesAsync();
@@ -153,6 +169,9 @@ public class AdminDbRepos
 
                 DbCountry dbCountry => dbCountry.CountryId,
                 DbCity dbCity => dbCity.CityId,
+                DbAddress dbAddress => dbAddress.AddressId,
+                DbAttraction dbAttraction => dbAttraction.AttractionId,
+                DbUser dbUser => dbUser.UserId,
                 DbComment dbComment => dbComment.CommentId,
                 _ => Guid.Empty
             };

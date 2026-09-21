@@ -9,7 +9,7 @@ using Models;
 
 namespace DbModels;
 
-public sealed class DbAttraction : Attraction
+public sealed class DbAttraction : Attraction, ISeed<DbAttraction>
 {
     [Key]
     public override Guid AttractionId { get; set; }
@@ -24,6 +24,17 @@ public sealed class DbAttraction : Attraction
     public override List<ICategory> Categories { get => DbCategories.ToList<ICategory>(); set => throw new NotImplementedException(); }
     [JsonIgnore]
     public List<DbCategory> DbCategories { get; set; } = new();
+    
+    [NotMapped]
+    public override IAddress Address { get => DbAddress; set => throw new NotImplementedException(); }
+    [ForeignKey("AdressId")]
+    public DbAddress DbAddress { get; set; }
+
+    public override DbAttraction Seed(SeedGenerator seedGenerator)
+    {
+        base.Seed(seedGenerator);
+        return this;
+    }
 
 }
 

@@ -12,6 +12,9 @@ public class GstUsrInfoDbDto
     public int NrSeededCountries { get; set; } = 0;
     public int NrUnseededCountries { get; set; } = 0;
 
+    public int NrSeededUsers { get; set; } = 0;
+    public int NrUnseededUsers { get; set; } = 0;
+
     public int NrSeededComments { get; set; } = 0;
     public int NrUnseededComments { get; set; } = 0;
 

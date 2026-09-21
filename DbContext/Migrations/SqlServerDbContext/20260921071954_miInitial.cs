@@ -76,7 +76,8 @@ namespace DbContext.Migrations.SqlServerDbContext
                 {
                     AddressId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DbCityCityId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DbCountryCountryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    DbCountryCountryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Seeded = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -99,16 +100,17 @@ namespace DbContext.Migrations.SqlServerDbContext
                 {
                     AttractionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "varchar(200)", nullable: true),
-                    DbCityCityId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    AdressId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Seeded = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Attraction", x => x.AttractionId);
                     table.ForeignKey(
-                        name: "FK_Attraction_City_DbCityCityId",
-                        column: x => x.DbCityCityId,
-                        principalTable: "City",
-                        principalColumn: "CityId");
+                        name: "FK_Attraction_Address_AdressId",
+                        column: x => x.AdressId,
+                        principalTable: "Address",
+                        principalColumn: "AddressId");
                 });
 
             migrationBuilder.CreateTable(
@@ -163,7 +165,8 @@ namespace DbContext.Migrations.SqlServerDbContext
                     DbUserUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CommentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Rating = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Seeded = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -196,9 +199,9 @@ namespace DbContext.Migrations.SqlServerDbContext
                 column: "DbCountryCountryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Attraction_DbCityCityId",
+                name: "IX_Attraction_AdressId",
                 table: "Attraction",
-                column: "DbCityCityId");
+                column: "AdressId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_City_DbCountryCountryId",
@@ -235,9 +238,6 @@ namespace DbContext.Migrations.SqlServerDbContext
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Address");
-
-            migrationBuilder.DropTable(
                 name: "DbAttractionDbCategory");
 
             migrationBuilder.DropTable(
@@ -254,6 +254,9 @@ namespace DbContext.Migrations.SqlServerDbContext
 
             migrationBuilder.DropTable(
                 name: "Attraction");
+
+            migrationBuilder.DropTable(
+                name: "Address");
 
             migrationBuilder.DropTable(
                 name: "City");

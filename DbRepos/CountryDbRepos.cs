@@ -23,6 +23,18 @@ public class CountryDbRepos
             public async Task<ResponsePageDto<ICountry>> ReadCountriesAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize)
     {
         IQueryable<DbCountry> query = _dbContext.Country.AsNoTracking();
+            if (flat)
+    {
+        // Create query without navigation properties
+        query = _dbContext.Country.AsNoTracking();
+    }
+    else
+    {
+        // Create query with all navigation properties included
+        query = _dbContext.Country.AsNoTracking()
+            .Include(i => i.DbCities)
+;
+    }
         var ret = new ResponsePageDto<ICountry>()
         {
 #if DEBUG
@@ -48,7 +60,7 @@ public class CountryDbRepos
     {
         // Create query with all navigation properties included
         query = _dbContext.Country.AsNoTracking()
-            .Include(i => i.Cities)
+            .Include(i => i.DbCities)
 ;
     }
 
