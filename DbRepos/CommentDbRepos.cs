@@ -22,7 +22,19 @@ public class CommentDbRepos
 
     public async Task<ResponsePageDto<IComment>> ReadCommentsAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize)
     {
-        IQueryable<DbComment> query = _dbContext.Comment.AsNoTracking();
+        IQueryable<DbComment> query;
+
+        if (flat)
+        {
+            query = _dbContext.Comment.AsNoTracking();
+        }
+        else
+        {
+            query = _dbContext.Comment.AsNoTracking()
+                .Include(i => i.DbReview)
+                .ThenInclude(r => r.DbAttraction);
+        }
+
         var ret = new ResponsePageDto<IComment>()
         {
 #if DEBUG
@@ -47,8 +59,8 @@ public class CommentDbRepos
     {
         // Create query with all navigation properties included
         query = _dbContext.Comment.AsNoTracking()
-            .Include(i => i.DbAttraction)
-;
+            .Include(i => i.DbReview)
+            .ThenInclude(r => r.DbAttraction);
     }
 
     // Find the C by ID and return

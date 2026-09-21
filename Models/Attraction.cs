@@ -17,7 +17,7 @@ public class Attraction : IAttraction, ISeed<Attraction>
     {
         Seeded = true;
         AttractionId = Guid.NewGuid();
-        Name = seedGenerator.LatinWords(2).ToString();
+        Name = seedGenerator.MusicAlbumName;
 
         return this;
     }

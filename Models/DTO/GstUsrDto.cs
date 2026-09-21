@@ -4,7 +4,6 @@ public class GstUsrInfoDbDto
 {
     public int NrSeededAttraction { get; set; } = 0;
     public int NrUnseededAttractions { get; set; } = 0;
-    public int NrAttractionsWithAddress { get; set; } = 0;
 
     public int NrSeededCities { get; set; } = 0;
     public int NrUnseededCities { get; set; } = 0;
@@ -20,6 +19,9 @@ public class GstUsrInfoDbDto
 
     public int NrSeededReviews { get; set; } = 0;
     public int NrUnseededReviews { get; set; } = 0;
+
+    public int NrSeededCategories { get; set; } = 0;
+    public int NrUnseededCategories { get; set; } = 0;
 }
 
 public class GstUsrInfoAttractionsDto

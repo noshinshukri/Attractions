@@ -27,8 +27,8 @@ namespace DbContext.Migrations.SqlServerDbContext
                     b.Property<Guid>("DbAttractionsAttractionId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("DbCategoriesCategoryId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("DbCategoriesCategoryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("DbAttractionsAttractionId", "DbCategoriesCategoryId");
 
@@ -85,14 +85,15 @@ namespace DbContext.Migrations.SqlServerDbContext
 
             modelBuilder.Entity("DbModels.DbCategory", b =>
                 {
-                    b.Property<int>("CategoryId")
+                    b.Property<Guid>("CategoryId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .HasColumnType("varchar(200)");
+
+                    b.Property<bool>("Seeded")
+                        .HasColumnType("bit");
 
                     b.HasKey("CategoryId");
 
@@ -130,15 +131,10 @@ namespace DbContext.Migrations.SqlServerDbContext
                     b.Property<string>("CommentText")
                         .HasColumnType("varchar(200)");
 
-                    b.Property<Guid?>("DbAttractionAttractionId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<bool>("Seeded")
                         .HasColumnType("bit");
 
                     b.HasKey("CommentId");
-
-                    b.HasIndex("DbAttractionAttractionId");
 
                     b.ToTable("Comment");
                 });
@@ -188,7 +184,9 @@ namespace DbContext.Migrations.SqlServerDbContext
 
                     b.HasIndex("AttractionId");
 
-                    b.HasIndex("CommentId");
+                    b.HasIndex("CommentId")
+                        .IsUnique()
+                        .HasFilter("[CommentId] IS NOT NULL");
 
                     b.HasIndex("DbUserUserId");
 
@@ -263,15 +261,6 @@ namespace DbContext.Migrations.SqlServerDbContext
                     b.Navigation("DbCountry");
                 });
 
-            modelBuilder.Entity("DbModels.DbComment", b =>
-                {
-                    b.HasOne("DbModels.DbAttraction", "DbAttraction")
-                        .WithMany()
-                        .HasForeignKey("DbAttractionAttractionId");
-
-                    b.Navigation("DbAttraction");
-                });
-
             modelBuilder.Entity("DbModels.DbReview", b =>
                 {
                     b.HasOne("DbModels.DbAttraction", "DbAttraction")
@@ -279,8 +268,8 @@ namespace DbContext.Migrations.SqlServerDbContext
                         .HasForeignKey("AttractionId");
 
                     b.HasOne("DbModels.DbComment", "DbComment")
-                        .WithMany()
-                        .HasForeignKey("CommentId");
+                        .WithOne("DbReview")
+                        .HasForeignKey("DbModels.DbReview", "CommentId");
 
                     b.HasOne("DbModels.DbUser", "DbUser")
                         .WithMany("DbReviews")
@@ -301,6 +290,11 @@ namespace DbContext.Migrations.SqlServerDbContext
             modelBuilder.Entity("DbModels.DbAttraction", b =>
                 {
                     b.Navigation("DbReviews");
+                });
+
+            modelBuilder.Entity("DbModels.DbComment", b =>
+                {
+                    b.Navigation("DbReview");
                 });
 
             modelBuilder.Entity("DbModels.DbCountry", b =>

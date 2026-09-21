@@ -15,13 +15,26 @@ namespace DbContext.Migrations.SqlServerDbContext
                 name: "Category",
                 columns: table => new
                 {
-                    CategoryId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "varchar(200)", nullable: true)
+                    CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "varchar(200)", nullable: true),
+                    Seeded = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Category", x => x.CategoryId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Comment",
+                columns: table => new
+                {
+                    CommentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CommentText = table.Column<string>(type: "varchar(200)", nullable: true),
+                    Seeded = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Comment", x => x.CommentId);
                 });
 
             migrationBuilder.CreateTable(
@@ -114,30 +127,11 @@ namespace DbContext.Migrations.SqlServerDbContext
                 });
 
             migrationBuilder.CreateTable(
-                name: "Comment",
-                columns: table => new
-                {
-                    CommentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CommentText = table.Column<string>(type: "varchar(200)", nullable: true),
-                    DbAttractionAttractionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Seeded = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Comment", x => x.CommentId);
-                    table.ForeignKey(
-                        name: "FK_Comment_Attraction_DbAttractionAttractionId",
-                        column: x => x.DbAttractionAttractionId,
-                        principalTable: "Attraction",
-                        principalColumn: "AttractionId");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "DbAttractionDbCategory",
                 columns: table => new
                 {
                     DbAttractionsAttractionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DbCategoriesCategoryId = table.Column<int>(type: "int", nullable: false)
+                    DbCategoriesCategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -209,11 +203,6 @@ namespace DbContext.Migrations.SqlServerDbContext
                 column: "DbCountryCountryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Comment_DbAttractionAttractionId",
-                table: "Comment",
-                column: "DbAttractionAttractionId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_DbAttractionDbCategory_DbCategoriesCategoryId",
                 table: "DbAttractionDbCategory",
                 column: "DbCategoriesCategoryId");
@@ -226,7 +215,9 @@ namespace DbContext.Migrations.SqlServerDbContext
             migrationBuilder.CreateIndex(
                 name: "IX_Review_CommentId",
                 table: "Review",
-                column: "CommentId");
+                column: "CommentId",
+                unique: true,
+                filter: "[CommentId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Review_DbUserUserId",
@@ -247,13 +238,13 @@ namespace DbContext.Migrations.SqlServerDbContext
                 name: "Category");
 
             migrationBuilder.DropTable(
+                name: "Attraction");
+
+            migrationBuilder.DropTable(
                 name: "Comment");
 
             migrationBuilder.DropTable(
                 name: "User");
-
-            migrationBuilder.DropTable(
-                name: "Attraction");
 
             migrationBuilder.DropTable(
                 name: "Address");

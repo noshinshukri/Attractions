@@ -15,9 +15,9 @@ public sealed class DbComment : Comment, ISeed<DbComment>
     public override Guid CommentId { get; set; }
     public override string CommentText { get; set; }
     [NotMapped]
-    public override IAttraction Attraction { get => DbAttraction; set => throw new NotImplementedException(); }
+    public override IReview Review { get => DbReview; set => throw new NotImplementedException(); }
     [JsonIgnore]
-    public DbAttraction DbAttraction { get; set; }
+    public DbReview DbReview { get; set; }
 
     public override DbComment Seed(SeedGenerator seedGenerator)
     {
