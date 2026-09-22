@@ -23,7 +23,8 @@ public class UserDbRepos
 
     public async Task<ResponsePageDto<IUser>> ReadUsersAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize)
     {
-        IQueryable<DbUser> query = _dbContext.User.AsNoTracking();
+        filter ??= "";
+        IQueryable<DbUser> query;
 
         if (flat)
         {
@@ -41,8 +42,28 @@ public class UserDbRepos
 #if DEBUG
             ConnectionString = _dbContext.dbConnection,
 #endif
-            DbItemsCount = await query.CountAsync(),
-            PageItems = await query.ToListAsync<IUser>(),
+            DbItemsCount = await query
+
+            //Adding filter functionality
+            .Where(i => (i.Seeded == seeded) &&
+                        (i.UserName.ToLower().Contains(filter) ||
+                            i.Email.ToLower().Contains(filter))).CountAsync(),
+
+            PageItems = await query
+
+            //Adding filter functionality
+            .Where(i => (i.Seeded == seeded) &&
+                        (i.UserName.ToLower().Contains(filter) ||
+                            i.Email.ToLower().Contains(filter)))
+
+            //Adding paging
+            .Skip(pageNumber * pageSize)
+            .Take(pageSize)
+
+            .ToListAsync<IUser>(),
+
+            PageNr = pageNumber,
+            PageSize = pageSize
         };
         return ret;
     }

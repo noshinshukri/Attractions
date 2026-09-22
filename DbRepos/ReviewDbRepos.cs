@@ -34,18 +34,37 @@ public class ReviewDbRepos
         {
             // Create query with all navigation properties included
             query = _dbContext.Review.AsNoTracking()
-                .Include(i => i.Attraction)
-                .Include(i => i.User)
-                .Include(i => i.Comment)
-                .Include(i => i.Rating);
+                .Include(i => i.DbAttraction)
+                .Include(i => i.DbUser)
+                .Include(i => i.DbComment);
         }
         var ret = new ResponsePageDto<IReview>()
         {
 #if DEBUG
             ConnectionString = _dbContext.dbConnection,
 #endif
-            DbItemsCount = await query.CountAsync(),
-            PageItems = await query.ToListAsync<IReview>(),
+            DbItemsCount = await query
+
+            //Adding filter functionality
+            .Where(i => (i.Seeded == seeded) &&
+                        (i.Attraction.Name.ToLower().Contains(filter) ||
+                            i.User.UserName.ToLower().Contains(filter))).CountAsync(),
+
+            PageItems = await query
+
+            //Adding filter functionality
+            .Where(i => (i.Seeded == seeded) &&
+                        (i.Attraction.Name.ToLower().Contains(filter) ||
+                            i.User.UserName.ToLower().Contains(filter)))
+
+            //Adding paging
+            .Skip(pageNumber * pageSize)
+            .Take(pageSize)
+
+            .ToListAsync<IReview>(),
+
+            PageNr = pageNumber,
+            PageSize = pageSize
         };
         return ret;
     }
@@ -63,10 +82,9 @@ public class ReviewDbRepos
         {
             // Create query with all navigation properties included
             query = _dbContext.Review.AsNoTracking()
-                .Include(i => i.Attraction)
-                .Include(i => i.User)
-                .Include(i => i.Comment)
-                .Include(i => i.Rating);
+                .Include(i => i.DbAttraction)
+                .Include(i => i.DbUser)
+                .Include(i => i.DbComment);
         }
 
         // Find the C by ID and return

@@ -41,8 +41,28 @@ public class CityDbRepos
 #if DEBUG
             ConnectionString = _dbContext.dbConnection,
 #endif
-            DbItemsCount = await query.CountAsync(),
-            PageItems = await query.ToListAsync<ICity>(),
+            DbItemsCount = await query
+
+            //Adding filter functionality
+            .Where(i => (i.Seeded == seeded) &&
+                        (i.CityName.ToLower().Contains(filter) ||
+                            i.Country.CountryName.ToLower().Contains(filter))).CountAsync(),
+
+            PageItems = await query
+
+            //Adding filter functionality
+            .Where(i => (i.Seeded == seeded) &&
+                        (i.CityName.ToLower().Contains(filter) ||
+                            i.Country.CountryName.ToLower().Contains(filter)))
+
+            //Adding paging
+            .Skip(pageNumber * pageSize)
+            .Take(pageSize)
+
+            .ToListAsync<ICity>(),
+
+            PageNr = pageNumber,
+            PageSize = pageSize
         };
         return ret;
     }

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 
 using Models;
+using Models.DTO;
 using DbRepos;
 using Services;
 
@@ -19,4 +20,8 @@ public class AddressDbService : IAddressService
     {
         _logger = logger;
     }
+
+    public Task<ResponsePageDto<IAddress>> ReadAddressesAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize) => _repo.ReadAdressesAsync(seeded, flat, filter, pageNumber, pageSize);
+    public Task<ResponseItemDto<IAddress>> ReadAddressAsync(Guid id, bool flat) => _repo.ReadAddressAsync(id, flat);
+    public Task<IAddress> DeleteAddressAsync(Guid id) => _repo.DeleteAddressAsync(id);
 }

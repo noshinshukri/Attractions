@@ -18,17 +18,20 @@ public sealed class DbReview : Review
 
     [NotMapped]
     public override IAttraction Attraction { get => DbAttraction; set => throw new NotImplementedException(); }
+    [JsonIgnore]
     [ForeignKey("AttractionId")]
     public DbAttraction DbAttraction { get; set; }
 
 
     [NotMapped]
     public override IUser User { get => DbUser; set => throw new NotImplementedException(); }
+    [JsonIgnore]
     public DbUser DbUser { get; set; }
 
 
     [NotMapped]
     public override IComment Comment { get => DbComment; set => throw new NotImplementedException(); }
+    [JsonIgnore]
     [ForeignKey("CommentId")]
     public DbComment DbComment { get; set; }
 

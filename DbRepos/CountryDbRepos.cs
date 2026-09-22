@@ -40,8 +40,26 @@ public class CountryDbRepos
 #if DEBUG
             ConnectionString = _dbContext.dbConnection,
 #endif
-            DbItemsCount = await query.CountAsync(),
-            PageItems = await query.ToListAsync<ICountry>(),
+            DbItemsCount = await query
+
+            //Adding filter functionality
+            .Where(i => (i.Seeded == seeded) &&
+                        i.CountryName.ToLower().Contains(filter)).CountAsync(),
+
+            PageItems = await query
+
+            //Adding filter functionality
+            .Where(i => (i.Seeded == seeded) &&
+                        i.CountryName.ToLower().Contains(filter))
+
+            //Adding paging
+            .Skip(pageNumber * pageSize)
+            .Take(pageSize)
+
+            .ToListAsync<ICountry>(),
+
+            PageNr = pageNumber,
+            PageSize = pageSize
         };
         return ret;
     }

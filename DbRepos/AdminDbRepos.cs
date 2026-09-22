@@ -122,7 +122,7 @@ public class AdminDbRepos
         var cities = seeder.ItemsToList<DbCity>(100);
         var addresses = seeder.ItemsToList<DbAddress>(1000);
         var attractions = seeder.ItemsToList<DbAttraction>(1000);
-        var users = seeder.ItemsToList<DbUser>(50);
+        var users = seeder.ItemsToList<DbUser>(500);
         var comments = seeder.ItemsToList<DbComment>(2000);
         var categories = seeder.ItemsToList<DbCategory>(5);
         var reviews = new List<DbReview>();
