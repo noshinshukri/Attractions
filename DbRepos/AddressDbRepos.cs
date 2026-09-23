@@ -46,15 +46,15 @@ public class AddressDbRepos
 
             //Adding filter functionality
             .Where(i => (i.Seeded == seeded) &&
-                        (i.City.CityName.ToLower().Contains(filter) ||
-                            i.Country.CountryName.ToLower().Contains(filter))).CountAsync(),
+                        (i.DbCity.CityName.ToLower().Contains(filter) ||
+                            i.DbCountry.CountryName.ToLower().Contains(filter))).CountAsync(),
 
             PageItems = await query
 
             //Adding filter functionality
             .Where(i => (i.Seeded == seeded) &&
-                        (i.City.CityName.ToLower().Contains(filter) ||
-                            i.Country.CountryName.ToLower().Contains(filter)))
+                        (i.DbCity.CityName.ToLower().Contains(filter) ||
+                            i.DbCountry.CountryName.ToLower().Contains(filter)))
 
             //Adding paging
             .Skip(pageNumber * pageSize)

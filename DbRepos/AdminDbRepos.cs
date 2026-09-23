@@ -53,6 +53,9 @@ public class AdminDbRepos
             NrSeededAttraction = await _dbContext.Attraction.Where(c => c.Seeded).CountAsync(),
             NrUnseededAttractions = await _dbContext.Attraction.Where(c => !c.Seeded).CountAsync(),
 
+            NrSeededAddresses = await _dbContext.Address.Where(c => c.Seeded).CountAsync(),
+            NrUnseededAddresses = await _dbContext.Address.Where(c => !c.Seeded).CountAsync(),
+
             NrSeededCities = await _dbContext.City.Where(c => c.Seeded).CountAsync(),
             NrUnseededCities = await _dbContext.City.Where(c => !c.Seeded).CountAsync(),
 
@@ -69,7 +72,7 @@ public class AdminDbRepos
             NrUnseededReviews = await _dbContext.Review.Where(c => !c.Seeded).CountAsync(),
 
             NrSeededCategories = await _dbContext.Category.Where(c => c.Seeded).CountAsync(),
-            NrUnseededCategories  = await _dbContext.Category.Where(c => !c.Seeded).CountAsync()
+            NrUnseededCategories = await _dbContext.Category.Where(c => !c.Seeded).CountAsync()
 
         };
 
@@ -119,7 +122,39 @@ public class AdminDbRepos
                 $"Only {countries.Count} unique countries were found.");
         }
 
-        var cities = seeder.ItemsToList<DbCity>(100);
+        var cities = new List<DbCity>();
+
+        foreach (var country in countries)
+        {
+            var cityNamesForCountry = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var citiesForCountry = new List<DbCity>();
+            var maxCityAttempts = Math.Max(100, 25 * 10);
+
+            for (var attempt = 0; citiesForCountry.Count < 25 && attempt < maxCityAttempts; attempt++)
+            {
+                var city = new DbCity();
+                city.DbCountry = country;   // sätt land FÖRE Seed, så Country?.CountryName är tillgängligt
+                city.Seed(seeder);          // nu väljer City() en stad från rätt lands lista
+
+                if (cityNamesForCountry.Add(city.CityName))
+                {
+                    city.Seeded = true;
+                    country.DbCities.Add(city);
+                    citiesForCountry.Add(city);
+                }
+            }
+
+            if (citiesForCountry.Count < 25)
+            {
+                throw new InvalidOperationException(
+                    $"Could not generate 25 unique cities for country '{country.CountryName}'. " +
+                    $"Only {citiesForCountry.Count} unique cities were found.");
+            }
+
+            cities.AddRange(citiesForCountry);
+        }
+
+
         var addresses = seeder.ItemsToList<DbAddress>(1000);
         var attractions = seeder.ItemsToList<DbAttraction>(1000);
         var users = seeder.ItemsToList<DbUser>(500);
@@ -135,22 +170,10 @@ public class AdminDbRepos
         categories.ForEach(c => c.Seeded = true);
         attractions.ForEach(a => a.Seeded = true);
 
-        foreach (var country in countries)
-        {
-            for (int i = 0; i < 100; i++)
-            {
-                var city = seeder.FromList(cities);
-
-                country.DbCities.Add(city);
-                city.DbCountry = country;
-                
-            }
-        }
-        
         foreach (var address in addresses)
         {
             var city = seeder.FromList(cities);
-            
+
 
             address.DbCity = city;
             address.DbCountry = city.DbCountry;
@@ -161,21 +184,21 @@ public class AdminDbRepos
             var address = seeder.FromList(addresses);
 
 
-            attraction.DbAddress = address; 
+            attraction.DbAddress = address;
 
             var numberOfCategories = seeder.Next(1, 4);
 
-        for (int i = 0; i < numberOfCategories; i++)
-        {
-             var category = seeder.FromList(categories);
-
-            if (!attraction.DbCategories.Contains(category))
+            for (int i = 0; i < numberOfCategories; i++)
             {
-                attraction.DbCategories.Add(category);
-                category.DbAttractions.Add(attraction);
+                var category = seeder.FromList(categories);
+
+                if (!attraction.DbCategories.Contains(category))
+                {
+                    attraction.DbCategories.Add(category);
+                    category.DbAttractions.Add(attraction);
+                }
             }
-            }   
-    
+
         }
 
         foreach (var review in reviews)
@@ -242,7 +265,7 @@ public class AdminDbRepos
         _dbContext.Comment.RemoveRange(_dbContext.Comment.Where(f => f.Seeded == seeded));
         _dbContext.Review.RemoveRange(_dbContext.Review.Where(f => f.Seeded == seeded));
         _dbContext.Category.RemoveRange(_dbContext.Category.Where(f => f.Seeded == seeded));
-        
+
 
         //LogChangeTracker();
         await _dbContext.SaveChangesAsync();

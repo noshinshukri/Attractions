@@ -22,20 +22,20 @@ public class CityDbRepos
 
     public async Task<ResponsePageDto<ICity>> ReadCitiesAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize)
     {
-        IQueryable<DbCity> query = _dbContext.City.AsNoTracking();
+        filter ??= "";
+        IQueryable<DbCity> query;
 
-            if (flat)
-    {
-        // Create query without navigation properties
-        query = _dbContext.City.AsNoTracking();
-    }
-    else
-    {
-        // Create query with all navigation properties included
-        query = _dbContext.City.AsNoTracking()
-            .Include(i => i.DbCountry)
-;
-    }
+        if (flat)
+        {
+            // Create query without navigation properties
+            query = _dbContext.City.AsNoTracking();
+        }
+        else
+        {
+            // Create query with all navigation properties included
+            query = _dbContext.City.AsNoTracking()
+                .Include(i => i.DbCountry);
+        }
         var ret = new ResponsePageDto<ICity>()
         {
 #if DEBUG
@@ -46,14 +46,14 @@ public class CityDbRepos
             //Adding filter functionality
             .Where(i => (i.Seeded == seeded) &&
                         (i.CityName.ToLower().Contains(filter) ||
-                            i.Country.CountryName.ToLower().Contains(filter))).CountAsync(),
+                            i.DbCountry.CountryName.ToLower().Contains(filter))).CountAsync(),
 
             PageItems = await query
 
             //Adding filter functionality
             .Where(i => (i.Seeded == seeded) &&
                         (i.CityName.ToLower().Contains(filter) ||
-                            i.Country.CountryName.ToLower().Contains(filter)))
+                            i.DbCountry.CountryName.ToLower().Contains(filter)))
 
             //Adding paging
             .Skip(pageNumber * pageSize)
@@ -67,35 +67,35 @@ public class CityDbRepos
         return ret;
     }
 
-            public async Task<ResponseItemDto<ICity>> ReadCityAsync(Guid id, bool flat)
-{
-    IQueryable<DbCity> query;
-    
-    if (flat)
+    public async Task<ResponseItemDto<ICity>> ReadCityAsync(Guid id, bool flat)
     {
-        // Create query without navigation properties
-        query = _dbContext.City.AsNoTracking();
-    }
-    else
-    {
-        // Create query with all navigation properties included
-        query = _dbContext.City.AsNoTracking()
-            .Include(i => i.DbCountry)
-;
-    }
+        IQueryable<DbCity> query;
 
-    // Find the C by ID and return
-    var C = await query.FirstOrDefaultAsync(f => f.CityId == id);
+        if (flat)
+        {
+            // Create query without navigation properties
+            query = _dbContext.City.AsNoTracking();
+        }
+        else
+        {
+            // Create query with all navigation properties included
+            query = _dbContext.City.AsNoTracking()
+                .Include(i => i.DbCountry)
+    ;
+        }
 
-    var ret = new ResponseItemDto<ICity>()
-    {
+        // Find the C by ID and return
+        var C = await query.FirstOrDefaultAsync(f => f.CityId == id);
+
+        var ret = new ResponseItemDto<ICity>()
+        {
 #if DEBUG
-        ConnectionString = _dbContext.dbConnection,
+            ConnectionString = _dbContext.dbConnection,
 #endif
-        Item = C
-    };
-    return ret;
-}
+            Item = C
+        };
+        return ret;
+    }
 
     public async Task<ICity> DeleteCityAsync(Guid id)
     {

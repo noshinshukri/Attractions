@@ -23,7 +23,8 @@ public class ReviewDbRepos
 
     public async Task<ResponsePageDto<IReview>> ReadReviewsAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize)
     {
-        IQueryable<DbReview> query = _dbContext.Review.AsNoTracking();
+        filter ??= "";
+        IQueryable<DbReview> query;
 
         if (flat)
         {
@@ -47,15 +48,15 @@ public class ReviewDbRepos
 
             //Adding filter functionality
             .Where(i => (i.Seeded == seeded) &&
-                        (i.Attraction.Name.ToLower().Contains(filter) ||
-                            i.User.UserName.ToLower().Contains(filter))).CountAsync(),
+                        (i.DbAttraction.Name.ToLower().Contains(filter) ||
+                            i.DbUser.UserName.ToLower().Contains(filter))).CountAsync(),
 
             PageItems = await query
 
             //Adding filter functionality
             .Where(i => (i.Seeded == seeded) &&
-                        (i.Attraction.Name.ToLower().Contains(filter) ||
-                            i.User.UserName.ToLower().Contains(filter)))
+                        (i.DbAttraction.Name.ToLower().Contains(filter) ||
+                            i.DbUser.UserName.ToLower().Contains(filter)))
 
             //Adding paging
             .Skip(pageNumber * pageSize)
@@ -116,5 +117,100 @@ public class ReviewDbRepos
         //write to database in a UoW
         await _dbContext.SaveChangesAsync();
         return item;
+    }
+
+    public async Task<ResponseItemDto<IReview>> CreateReviewAsync(ReviewCuDto itemDto)
+    {
+        // 1. Validate that ReviewId is null
+        if (itemDto.ReviewId != null)
+            throw new ArgumentException($"{nameof(itemDto.ReviewId)} must be null when creating a new object");
+
+        // 2. Create new database entity from DTO
+        var item = new DbReview(itemDto);
+
+        // 3. Update navigation properties
+        await navProp_ReviewCUdto_to_ReviewDbM(itemDto, item);
+
+        // 4. Add to context and save
+        _dbContext.Review.Add(item);
+        await _dbContext.SaveChangesAsync();
+
+        // 5. Return fully populated item
+        return await ReadReviewAsync(item.ReviewId, false);
+    }
+
+    private async Task navProp_ReviewCUdto_to_ReviewDbM(ReviewCuDto itemDtoSrc, DbReview itemDst)
+    {
+        // Attraction not nullable
+        var attraction = await _dbContext.Attraction
+            .FirstOrDefaultAsync(a => a.AttractionId == itemDtoSrc.AttractionId);
+        if (attraction == null)
+            throw new ArgumentException($"Attraction id {itemDtoSrc.AttractionId} not existing");
+        itemDst.DbAttraction = attraction;
+
+        // User not nullable
+        var user = await _dbContext.User
+            .FirstOrDefaultAsync(u => u.UserId == itemDtoSrc.UserId);
+        if (user == null)
+            throw new ArgumentException($"User id {itemDtoSrc.UserId} not existing");
+        itemDst.DbUser = user;
+
+        // Comment is optional, new id is generated 
+        if (!string.IsNullOrWhiteSpace(itemDtoSrc.CommentText))
+        {
+            if (itemDst.DbComment != null)
+            {
+                // If comments exist, update
+                itemDst.DbComment.CommentText = itemDtoSrc.CommentText;
+            }
+            else
+            {
+                // Create new comment if none exist
+                var comment = new DbComment
+                {
+                    CommentId = Guid.NewGuid(),
+                    CommentText = itemDtoSrc.CommentText
+                };
+
+                _dbContext.Comment.Add(comment);
+                itemDst.DbComment = comment;
+            }
+        }
+        else
+        {
+            // If no input, set null
+            itemDst.DbComment = null;
+        }
+    }
+
+    public async Task<ResponseItemDto<IReview>> UpdateReviewAsync(ReviewCuDto itemDto)
+    {
+        //Find the instance with matching id and read the navigation properties.
+        var query1 = _dbContext.Review
+            .Where(i => i.ReviewId == itemDto.ReviewId);
+        var item = await query1
+            .Include(i => i.DbAttraction)
+            .Include(i => i.DbUser)
+            .Include(i => i.DbComment)
+            .FirstOrDefaultAsync<DbReview>();
+
+        //If the item does not exists
+        if (item == null) throw new ArgumentException($"Item {itemDto.ReviewId} is not existing");
+
+        //transfer any changes from DTO to database objects
+        //Update individual properties
+        item.UpdateFromDTO(itemDto);
+
+        //Update navigation properties
+        await navProp_ReviewCUdto_to_ReviewDbM(itemDto, item);
+
+        //write to database model
+        _dbContext.Review.Update(item);
+
+        //write to database in a UoW
+        await _dbContext.SaveChangesAsync();
+
+        //return the updated item in non-flat mode
+        return await ReadReviewAsync(item.ReviewId, false);
     }
 }

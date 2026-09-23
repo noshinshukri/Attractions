@@ -54,6 +54,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddInMemoryLogger();
 
 //Inject DbRepos and Services
+builder.Services.AddScoped<AddressDbRepos>();
 builder.Services.AddScoped<AdminDbRepos>();
 builder.Services.AddScoped<AttractionDbRepos>();
 builder.Services.AddScoped<CommentDbRepos>();
@@ -64,6 +65,7 @@ builder.Services.AddScoped<UserDbRepos>();
 builder.Services.AddScoped<ReviewDbRepos>();
 
 
+builder.Services.AddScoped<IAddressService, AddressDbService>();
 builder.Services.AddScoped<IAdminService, AdminDbService>();
 builder.Services.AddScoped<IAttractionService, AttractionDbService>();
 builder.Services.AddScoped<ICommentService, CommentDbService>();

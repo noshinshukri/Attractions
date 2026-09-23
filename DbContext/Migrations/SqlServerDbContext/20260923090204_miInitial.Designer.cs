@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DbContext.Migrations.SqlServerDbContext
 {
     [DbContext(typeof(MainDbContext.SqlServerDbContext))]
-    [Migration("20260921152939_miInitial")]
+    [Migration("20260923090204_miInitial")]
     partial class miInitial
     {
         /// <inheritdoc />
@@ -70,8 +70,11 @@ namespace DbContext.Migrations.SqlServerDbContext
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("AdressId")
+                    b.Property<Guid?>("DbAddressAddressId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("varchar(200)");
 
                     b.Property<string>("Name")
                         .HasColumnType("varchar(200)");
@@ -81,7 +84,7 @@ namespace DbContext.Migrations.SqlServerDbContext
 
                     b.HasKey("AttractionId");
 
-                    b.HasIndex("AdressId");
+                    b.HasIndex("DbAddressAddressId");
 
                     b.ToTable("Attraction");
                 });
@@ -112,7 +115,7 @@ namespace DbContext.Migrations.SqlServerDbContext
                     b.Property<string>("CityName")
                         .HasColumnType("varchar(200)");
 
-                    b.Property<Guid?>("DbCountryCountryId")
+                    b.Property<Guid?>("CountryId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("Seeded")
@@ -120,7 +123,11 @@ namespace DbContext.Migrations.SqlServerDbContext
 
                     b.HasKey("CityId");
 
-                    b.HasIndex("DbCountryCountryId");
+                    b.HasIndex("CountryId");
+
+                    b.HasIndex("CityName", "CountryId")
+                        .IsUnique()
+                        .HasFilter("[CityName] IS NOT NULL AND [CountryId] IS NOT NULL");
 
                     b.ToTable("City");
                 });
@@ -250,7 +257,7 @@ namespace DbContext.Migrations.SqlServerDbContext
                 {
                     b.HasOne("DbModels.DbAddress", "DbAddress")
                         .WithMany("DbAttractions")
-                        .HasForeignKey("AdressId");
+                        .HasForeignKey("DbAddressAddressId");
 
                     b.Navigation("DbAddress");
                 });
@@ -259,7 +266,7 @@ namespace DbContext.Migrations.SqlServerDbContext
                 {
                     b.HasOne("DbModels.DbCountry", "DbCountry")
                         .WithMany("DbCities")
-                        .HasForeignKey("DbCountryCountryId");
+                        .HasForeignKey("CountryId");
 
                     b.Navigation("DbCountry");
                 });

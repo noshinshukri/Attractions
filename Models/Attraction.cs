@@ -7,6 +7,7 @@ public class Attraction : IAttraction, ISeed<Attraction>
 {
     public virtual Guid AttractionId { get; set; }
     public virtual string Name { get; set; }
+    public virtual string Description { get; set; }
 
     public virtual List<IReview> Reviews { get; set; } = null;
     public virtual List<ICategory> Categories { get; set; } = null;
@@ -18,6 +19,7 @@ public class Attraction : IAttraction, ISeed<Attraction>
         Seeded = true;
         AttractionId = Guid.NewGuid();
         Name = seedGenerator.MusicAlbumName;
+        Description = seedGenerator.LatinSentence;
 
         return this;
     }

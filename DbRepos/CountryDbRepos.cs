@@ -20,21 +20,21 @@ public class CountryDbRepos
         _dbContext = context;
     }
 
-            public async Task<ResponsePageDto<ICountry>> ReadCountriesAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize)
+    public async Task<ResponsePageDto<ICountry>> ReadCountriesAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize)
     {
-        IQueryable<DbCountry> query = _dbContext.Country.AsNoTracking();
-            if (flat)
-    {
-        // Create query without navigation properties
-        query = _dbContext.Country.AsNoTracking();
-    }
-    else
-    {
-        // Create query with all navigation properties included
-        query = _dbContext.Country.AsNoTracking()
-            .Include(i => i.DbCities)
-;
-    }
+        filter ??= "";
+        IQueryable<DbCountry> query;
+        if (flat)
+        {
+            // Create query without navigation properties
+            query = _dbContext.Country.AsNoTracking();
+        }
+        else
+        {
+            // Create query with all navigation properties included
+            query = _dbContext.Country.AsNoTracking()
+                .Include(i => i.DbCities);
+        }
         var ret = new ResponsePageDto<ICountry>()
         {
 #if DEBUG
@@ -65,35 +65,35 @@ public class CountryDbRepos
     }
 
 
-        public async Task<ResponseItemDto<ICountry>> ReadCountryAsync(Guid id, bool flat)
-{
-    IQueryable<DbCountry> query;
-    
-    if (flat)
+    public async Task<ResponseItemDto<ICountry>> ReadCountryAsync(Guid id, bool flat)
     {
-        // Create query without navigation properties
-        query = _dbContext.Country.AsNoTracking();
-    }
-    else
-    {
-        // Create query with all navigation properties included
-        query = _dbContext.Country.AsNoTracking()
-            .Include(i => i.DbCities)
-;
-    }
+        IQueryable<DbCountry> query;
 
-    // Find the C by ID and return
-    var C = await query.FirstOrDefaultAsync(f => f.CountryId == id);
+        if (flat)
+        {
+            // Create query without navigation properties
+            query = _dbContext.Country.AsNoTracking();
+        }
+        else
+        {
+            // Create query with all navigation properties included
+            query = _dbContext.Country.AsNoTracking()
+                .Include(i => i.DbCities)
+    ;
+        }
 
-    var ret = new ResponseItemDto<ICountry>()
-    {
+        // Find the C by ID and return
+        var C = await query.FirstOrDefaultAsync(f => f.CountryId == id);
+
+        var ret = new ResponseItemDto<ICountry>()
+        {
 #if DEBUG
-        ConnectionString = _dbContext.dbConnection,
+            ConnectionString = _dbContext.dbConnection,
 #endif
-        Item = C
-    };
-    return ret;
-}
+            Item = C
+        };
+        return ret;
+    }
 
     public async Task<ICountry> DeleteCountryAsync(Guid id)
     {

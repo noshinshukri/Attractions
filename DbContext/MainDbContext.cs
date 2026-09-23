@@ -13,7 +13,7 @@ namespace DbContext;
 //used for all Database connection as well as for EFC CodeFirst migration and database updates 
 public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
 {
-        DatabaseConnections _databaseConnections;
+    DatabaseConnections _databaseConnections;
 
 #if DEBUG
     // remove password from connection string in debug mode
@@ -37,7 +37,7 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
     #region constructors
     public MainDbContext() { }
     public MainDbContext(DbContextOptions options, DatabaseConnections databaseConnections) : base(options)
-    { 
+    {
         _databaseConnections = databaseConnections;
     }
     #endregion
@@ -46,8 +46,16 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         #region override modelbuilder
+        modelBuilder.Entity<DbCity>()
+        .HasOne(c => c.DbCountry)
+        .WithMany(co => co.DbCities)
+        .HasForeignKey("CountryId");
+
+        modelBuilder.Entity<DbCity>()
+            .HasIndex("CityName", "CountryId")
+            .IsUnique();
         #endregion
-        
+
         base.OnModelCreating(modelBuilder);
     }
 
@@ -55,7 +63,7 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
     public class SqlServerDbContext : MainDbContext
     {
         public SqlServerDbContext() { }
-        public SqlServerDbContext(DbContextOptions options, DatabaseConnections databaseConnections) 
+        public SqlServerDbContext(DbContextOptions options, DatabaseConnections databaseConnections)
             : base(options, databaseConnections) { }
 
 
@@ -118,7 +126,7 @@ public class MainDbContext : Microsoft.EntityFrameworkCore.DbContext
     public class PostgresDbContext : MainDbContext
     {
         public PostgresDbContext() { }
-        public PostgresDbContext(DbContextOptions options) : base(options, null){ }
+        public PostgresDbContext(DbContextOptions options) : base(options, null) { }
 
 
         //Used only for CodeFirst Database Migration

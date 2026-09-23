@@ -114,4 +114,71 @@ public class UserDbRepos
         await _dbContext.SaveChangesAsync();
         return item;
     }
+
+    public async Task<ResponseItemDto<IUser>> CreateUserAsync(UserCuDto itemDto)
+    {
+        // 1. Validate that UserId is null
+        if (itemDto.UserId != null)
+            throw new ArgumentException($"{nameof(itemDto.UserId)} must be null when creating a new object");
+
+        // 2. Create new database entity from DTO
+        var item = new DbUser(itemDto);
+
+        // 3. Update navigation properties
+        await navProp_UserCUdto_to_UserDbM(itemDto, item);
+
+        // 4. Add to context and save
+        _dbContext.User.Add(item);
+        await _dbContext.SaveChangesAsync();
+
+        // 5. Return fully populated item
+        return await ReadUserAsync(item.UserId, false);
+    }
+
+    private async Task navProp_UserCUdto_to_UserDbM(UserCuDto itemDtoSrc, DbUser itemDst)
+    {
+        // Multiple relationships (Pets)
+        if (itemDtoSrc.ReviewsId != null)
+        {
+            var reviews = new List<DbReview>();
+            foreach (var id in itemDtoSrc.ReviewsId)
+            {
+                var p = await _dbContext.Review.FirstOrDefaultAsync(i => i.ReviewId == id);
+                if (p == null) throw new ArgumentException($"Review id {id} not existing");
+                reviews.Add(p);
+            }
+            itemDst.DbReviews = reviews;
+        }
+
+        // Multiple relationships (Quotes) - similar pattern
+    }
+
+    public async Task<ResponseItemDto<IUser>> UpdateUserAsync(UserCuDto itemDto)
+    {
+        //Find the instance with matching id and read the navigation properties.
+        var query1 = _dbContext.User
+            .Where(i => i.UserId == itemDto.UserId);
+        var item = await query1
+            .Include(i => i.DbReviews)
+            .FirstOrDefaultAsync<DbUser>();
+
+        //If the item does not exists
+        if (item == null) throw new ArgumentException($"Item {itemDto.UserId} is not existing");
+
+        //transfer any changes from DTO to database objects
+        //Update individual properties
+        item.UpdateFromDTO(itemDto);
+
+        //Update navigation properties
+        await navProp_UserCUdto_to_UserDbM(itemDto, item);
+
+        //write to database model
+        _dbContext.User.Update(item);
+
+        //write to database in a UoW
+        await _dbContext.SaveChangesAsync();
+
+        //return the updated item in non-flat mode
+        return await ReadUserAsync(item.UserId, false);
+    }
 }

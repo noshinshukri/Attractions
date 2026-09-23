@@ -71,6 +71,58 @@ namespace AppWebApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+                //POST: api/Attractions/createitem
+        //Body: csAttractionCUdto in Json
+        [HttpPost()]
+        [ActionName("CreateItem")]
+        [ProducesResponseType(200, Type = typeof(IAttraction))]
+        [ProducesResponseType(400, Type = typeof(string))]
+        public async Task<IActionResult> CreateItem([FromBody] AttractionCuDto item)
+        {
+            try
+            {
+                _logger.LogInformation($"{nameof(CreateItem)}:");
+                
+                var _item = await _service.CreateAttractionAsync(item);
+                _logger.LogInformation($"item {_item.Item.AttractionId} created");
+
+                return Ok(_item);       
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(CreateItem)}: {ex.Message}");
+                return BadRequest($"Could not create. Error {ex.Message}");
+            }
+        }
+
+                //PUT: api/Attractions/updateitem/id
+        //Body: csAttractionCUdto in Json
+        [HttpPut("{id}")]
+        [ActionName("UpdateItem")]
+        [ProducesResponseType(200, Type = typeof(IAttraction))]
+        [ProducesResponseType(400, Type = typeof(string))]
+        public async Task<IActionResult> UpdateItem(string id, [FromBody] AttractionCuDto item)
+        {
+            try
+            {
+                var idArg = Guid.Parse(id);
+
+                _logger.LogInformation($"{nameof(UpdateItem)}: {nameof(idArg)}: {idArg}");
+                
+                if (item.AttractionId != idArg) throw new ArgumentException("Id mismatch");
+
+                var _item = await _service.UpdateAttractionAsync(item);
+                _logger.LogInformation($"item {idArg} updated");
+               
+                return Ok(_item);             
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(UpdateItem)}: {ex.Message}");
+                return BadRequest($"Could not update. Error {ex.Message}");
+            }
+        }
         
         //DELETE: api/Attraction/deleteitem/id
         [HttpDelete("{id}")]

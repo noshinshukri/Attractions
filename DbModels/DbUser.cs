@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Seido.Utilities.SeedGenerator;
 
 using Models;
+using Models.DTO;
 
 namespace DbModels;
 
@@ -27,6 +28,22 @@ public sealed class DbUser : User, ISeed<DbUser>
     {
         base.Seed(seedGenerator);
         return this;
+    }
+
+    public DbUser() { }
+
+    public DbUser UpdateFromDTO(UserCuDto org)
+    {
+        UserName = org.UserName;
+        Email = org.Email;
+
+        return this;
+    }
+
+    public DbUser(UserCuDto org)
+    {
+        UserId = Guid.NewGuid();
+        UpdateFromDTO(org);
     }
 
 }

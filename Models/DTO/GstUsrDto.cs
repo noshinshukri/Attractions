@@ -5,6 +5,9 @@ public class GstUsrInfoDbDto
     public int NrSeededAttraction { get; set; } = 0;
     public int NrUnseededAttractions { get; set; } = 0;
 
+    public int NrSeededAddresses { get; set; } = 0;
+    public int NrUnseededAddresses { get; set; } = 0;
+
     public int NrSeededCities { get; set; } = 0;
     public int NrUnseededCities { get; set; } = 0;
 

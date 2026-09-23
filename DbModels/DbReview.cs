@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Seido.Utilities.SeedGenerator;
 
 using Models;
+using Models.DTO;
 
 namespace DbModels;
 
@@ -38,4 +39,26 @@ public sealed class DbReview : Review
 
     public override ReviewRating Rating { get; set; }
     public override DateTime CreatedAt { get; set; }
+
+
+    public DbReview() { }
+
+    public DbReview UpdateFromDTO(ReviewCuDto org)
+    {
+        Rating = org.Rating;
+
+        return this;
+    }
+
+    public DbReview(ReviewCuDto org)
+    {
+        ReviewId = Guid.NewGuid();
+        CreatedAt = DateTime.UtcNow;
+        UpdateFromDTO(org);
+    }
+
+    public static explicit operator ReviewRating(DbReview v)
+    {
+        throw new NotImplementedException();
+    }
 }

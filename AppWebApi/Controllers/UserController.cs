@@ -71,6 +71,58 @@ namespace AppWebApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        //POST: api/Users/createitem
+        //Body: csUserCUdto in Json
+        [HttpPost()]
+        [ActionName("CreateItem")]
+        [ProducesResponseType(200, Type = typeof(IUser))]
+        [ProducesResponseType(400, Type = typeof(string))]
+        public async Task<IActionResult> CreateItem([FromBody] UserCuDto item)
+        {
+            try
+            {
+                _logger.LogInformation($"{nameof(CreateItem)}:");
+                
+                var _item = await _service.CreateUserAsync(item);
+                _logger.LogInformation($"item {_item.Item.UserId} created");
+
+                return Ok(_item);       
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(CreateItem)}: {ex.Message}");
+                return BadRequest($"Could not create. Error {ex.Message}");
+            }
+        }
+
+                //PUT: api/Users/updateitem/id
+        //Body: csUserCUdto in Json
+        [HttpPut("{id}")]
+        [ActionName("UpdateItem")]
+        [ProducesResponseType(200, Type = typeof(IUser))]
+        [ProducesResponseType(400, Type = typeof(string))]
+        public async Task<IActionResult> UpdateItem(string id, [FromBody] UserCuDto item)
+        {
+            try
+            {
+                var idArg = Guid.Parse(id);
+
+                _logger.LogInformation($"{nameof(UpdateItem)}: {nameof(idArg)}: {idArg}");
+                
+                if (item.UserId != idArg) throw new ArgumentException("Id mismatch");
+
+                var _item = await _service.UpdateUserAsync(item);
+                _logger.LogInformation($"item {idArg} updated");
+               
+                return Ok(_item);             
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(UpdateItem)}: {ex.Message}");
+                return BadRequest($"Could not update. Error {ex.Message}");
+            }
+        }
         
         //DELETE: api/User/deleteitem/id
         [HttpDelete("{id}")]

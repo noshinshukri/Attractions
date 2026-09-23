@@ -70,15 +70,15 @@ namespace DbContext.Migrations.SqlServerDbContext
                 {
                     CityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CityName = table.Column<string>(type: "varchar(200)", nullable: true),
-                    DbCountryCountryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CountryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Seeded = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_City", x => x.CityId);
                     table.ForeignKey(
-                        name: "FK_City_Country_DbCountryCountryId",
-                        column: x => x.DbCountryCountryId,
+                        name: "FK_City_Country_CountryId",
+                        column: x => x.CountryId,
                         principalTable: "Country",
                         principalColumn: "CountryId");
                 });
@@ -113,15 +113,16 @@ namespace DbContext.Migrations.SqlServerDbContext
                 {
                     AttractionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "varchar(200)", nullable: true),
-                    AdressId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Description = table.Column<string>(type: "varchar(200)", nullable: true),
+                    DbAddressAddressId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Seeded = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Attraction", x => x.AttractionId);
                     table.ForeignKey(
-                        name: "FK_Attraction_Address_AdressId",
-                        column: x => x.AdressId,
+                        name: "FK_Attraction_Address_DbAddressAddressId",
+                        column: x => x.DbAddressAddressId,
                         principalTable: "Address",
                         principalColumn: "AddressId");
                 });
@@ -193,14 +194,21 @@ namespace DbContext.Migrations.SqlServerDbContext
                 column: "DbCountryCountryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Attraction_AdressId",
+                name: "IX_Attraction_DbAddressAddressId",
                 table: "Attraction",
-                column: "AdressId");
+                column: "DbAddressAddressId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_City_DbCountryCountryId",
+                name: "IX_City_CityName_CountryId",
                 table: "City",
-                column: "DbCountryCountryId");
+                columns: new[] { "CityName", "CountryId" },
+                unique: true,
+                filter: "[CityName] IS NOT NULL AND [CountryId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_City_CountryId",
+                table: "City",
+                column: "CountryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DbAttractionDbCategory_DbCategoriesCategoryId",

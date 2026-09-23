@@ -31,11 +31,11 @@ namespace AppWebApi.Controllers
                 int pageNrArg = int.Parse(pageNr);
                 int pageSizeArg = int.Parse(pageSize);
 
-                 _logger.LogInformation($"{nameof(Read)}: {nameof(seededArg)}: {seededArg}, {nameof(flatArg)}: {flatArg}, " +
-                    $"{nameof(pageNrArg)}: {pageNrArg}, {nameof(pageSizeArg)}: {pageSizeArg}");
+                _logger.LogInformation($"{nameof(Read)}: {nameof(seededArg)}: {seededArg}, {nameof(flatArg)}: {flatArg}, " +
+                   $"{nameof(pageNrArg)}: {pageNrArg}, {nameof(pageSizeArg)}: {pageSizeArg}");
 
-                var resp = await _service.ReadReviewsAsync(seededArg, flatArg, filter?.Trim().ToLower(), pageNrArg, pageSizeArg);     
-                return Ok(resp);     
+                var resp = await _service.ReadReviewsAsync(seededArg, flatArg, filter?.Trim().ToLower(), pageNrArg, pageSizeArg);
+                return Ok(resp);
             }
             catch (Exception ex)
             {
@@ -44,7 +44,7 @@ namespace AppWebApi.Controllers
             }
         }
 
-                //GET: api/Review/readitem
+        //GET: api/Review/readitem
         [HttpGet()]
         [ActionName("ReadItem")]
         [ProducesResponseType(200, Type = typeof(IReview))]
@@ -60,10 +60,10 @@ namespace AppWebApi.Controllers
                 _logger.LogInformation($"{nameof(ReadItem)}: {nameof(idArg)}: {idArg}, {nameof(flatArg)}: {flatArg}");
 
                 var item = await _service.ReadReviewAsync(idArg, flatArg);
-                if (item == null) throw new ArgumentException ($"Item with id {id} does not exist");
+                if (item == null) throw new ArgumentException($"Item with id {id} does not exist");
 
-                
-                return Ok(item);         
+
+                return Ok(item);
             }
             catch (Exception ex)
             {
@@ -71,7 +71,59 @@ namespace AppWebApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        
+
+        //POST: api/Reviews/createitem
+        //Body: csReviewCUdto in Json
+        [HttpPost()]
+        [ActionName("CreateItem")]
+        [ProducesResponseType(200, Type = typeof(IReview))]
+        [ProducesResponseType(400, Type = typeof(string))]
+        public async Task<IActionResult> CreateItem([FromBody] ReviewCuDto item)
+        {
+            try
+            {
+                _logger.LogInformation($"{nameof(CreateItem)}:");
+
+                var _item = await _service.CreateReviewAsync(item);
+                _logger.LogInformation($"item {_item.Item.ReviewId} created");
+
+                return Ok(_item);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(CreateItem)}: {ex.Message}");
+                return BadRequest($"Could not create. Error {ex.Message}");
+            }
+        }
+
+        //PUT: api/Reviews/updateitem/id
+        //Body: csReviewCUdto in Json
+        [HttpPut("{id}")]
+        [ActionName("UpdateItem")]
+        [ProducesResponseType(200, Type = typeof(IReview))]
+        [ProducesResponseType(400, Type = typeof(string))]
+        public async Task<IActionResult> UpdateItem(string id, [FromBody] ReviewCuDto item)
+        {
+            try
+            {
+                var idArg = Guid.Parse(id);
+
+                _logger.LogInformation($"{nameof(UpdateItem)}: {nameof(idArg)}: {idArg}");
+
+                if (item.ReviewId != idArg) throw new ArgumentException("Id mismatch");
+
+                var _item = await _service.UpdateReviewAsync(item);
+                _logger.LogInformation($"item {idArg} updated");
+
+                return Ok(_item);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(UpdateItem)}: {ex.Message}");
+                return BadRequest($"Could not update. Error {ex.Message}");
+            }
+        }
+
         //DELETE: api/Review/deleteitem/id
         [HttpDelete("{id}")]
         [ActionName("DeleteItem")]
@@ -86,7 +138,7 @@ namespace AppWebApi.Controllers
                 _logger.LogInformation($"{nameof(DeleteItem)}: {nameof(idArg)}: {idArg}");
 
                 var item = await _service.DeleteReviewAsync(idArg);
-                if (item == null) throw new ArgumentException ($"Item with id {id} does not exist");
+                if (item == null) throw new ArgumentException($"Item with id {id} does not exist");
 
                 _logger.LogInformation($"item {idArg} deleted");
                 return Ok(item);
@@ -98,6 +150,7 @@ namespace AppWebApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
 
         public ReviewController(IReviewService service, ILogger<ReviewController> logger)
         {

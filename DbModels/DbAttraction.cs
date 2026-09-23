@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Seido.Utilities.SeedGenerator;
 
 using Models;
+using Models.DTO;
 
 namespace DbModels;
 
@@ -14,6 +15,8 @@ public sealed class DbAttraction : Attraction, ISeed<DbAttraction>
     [Key]
     public override Guid AttractionId { get; set; }
     public override string Name { get; set; }
+    public override string Description { get; set; }
+
 
     [NotMapped]
     public override List<IReview> Reviews { get => DbReviews.ToList<IReview>(); set => throw new NotImplementedException(); }
@@ -27,13 +30,29 @@ public sealed class DbAttraction : Attraction, ISeed<DbAttraction>
     
     [NotMapped]
     public override IAddress Address { get => DbAddress; set => throw new NotImplementedException(); }
-    [ForeignKey("AdressId")]
+    [JsonIgnore]
     public DbAddress DbAddress { get; set; }
 
     public override DbAttraction Seed(SeedGenerator seedGenerator)
     {
         base.Seed(seedGenerator);
         return this;
+    }
+
+    public DbAttraction() { }
+
+    public DbAttraction UpdateFromDTO(AttractionCuDto org)
+    {
+        Name = org.Name;
+        Description = org.Description;
+
+        return this;
+    }
+
+    public DbAttraction(AttractionCuDto org)
+    {
+        AttractionId = Guid.NewGuid();
+        UpdateFromDTO(org);
     }
 
 }

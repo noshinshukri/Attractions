@@ -16,6 +16,8 @@ public class City : ICity, ISeed<City>
 
         CityName = seedGenerator.City();
 
+        CityName = seedGenerator.City(Country?.CountryName);
+
         return this;
     }
 

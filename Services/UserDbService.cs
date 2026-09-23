@@ -24,4 +24,7 @@ public class UserDbService : IUserService
     public Task<ResponsePageDto<IUser>> ReadUsersAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize) => _repo.ReadUsersAsync(seeded, flat, filter, pageNumber, pageSize);
     public Task<ResponseItemDto<IUser>> ReadUserAsync(Guid id, bool flat) => _repo.ReadUserAsync(id, flat);
     public Task<IUser> DeleteUserAsync(Guid id) => _repo.DeleteUserAsync(id);
+
+    public Task<ResponseItemDto<IUser>> UpdateUserAsync(UserCuDto item) => _repo.UpdateUserAsync(item);
+    public Task<ResponseItemDto<IUser>> CreateUserAsync(UserCuDto item) => _repo.CreateUserAsync(item);
 }
