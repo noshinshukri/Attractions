@@ -2,6 +2,8 @@
 
 ## Hur C#-klasserna för databastabellerna är uppbyggda
 
+Applikationen är skapad av Noshin Shukri.
+---
 Jag har byggt upp databastabellerna i tre delar:
 
 ### 1. Interface
