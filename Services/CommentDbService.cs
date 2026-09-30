@@ -23,5 +23,8 @@ public class CommentDbService : ICommentService
 
     public Task<ResponsePageDto<IComment>> ReadCommentsAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize) => _repo.ReadCommentsAsync(seeded, flat, filter, pageNumber, pageSize);
     public Task<ResponseItemDto<IComment>> ReadCommentAsync(Guid id, bool flat) => _repo.ReadCommentAsync(id, flat);
-    public Task<IComment> DeleteCommentAsync(Guid id) => _repo.DeleteCommentAsync(id);
+    public Task<ResponseItemDto<IComment>> DeleteCommentAsync(Guid id) => _repo.DeleteCommentAsync(id);
+
+    public Task<ResponseItemDto<IComment>> UpdateCommentAsync(CommentCuDto item) => _repo.UpdateCommentAsync(item);
+    public Task<ResponseItemDto<IComment>> CreateCommentAsync(CommentCuDto item) => _repo.CreateCommentAsync(item);
 }

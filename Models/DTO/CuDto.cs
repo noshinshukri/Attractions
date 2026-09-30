@@ -91,10 +91,7 @@ public class AttractionCuDto
         AttractionId = org.AttractionId;
         Name = org.Name;
         Description = org.Description;
-        AddressId = org.Address.AddressId;
-        CountryId = org.Address?.Country?.CountryId;
-        CityId = org.Address?.City?.CityId;
-        ReviewsId = org.Reviews?.Select(r => r.ReviewId).ToList();
+        AddressId = org.Address?.AddressId;
         CategoriesId = org.Categories?.Select(c => c.CategoryId).ToList();
     }
 }
@@ -121,7 +118,18 @@ public class ReviewCuDto
 
 public class CommentCuDto
 {
+    public Guid? CommentId { get; set; }
+    public string CommentText { get; set; }
+    public Guid? ReviewId { get; set; }
 
+    public CommentCuDto() { }
+
+    public CommentCuDto(IComment org)
+    {
+        CommentId = org.CommentId;
+        CommentText = org.CommentText;
+        ReviewId = org.Review?.ReviewId;
+    }
 }
 
 public class Category

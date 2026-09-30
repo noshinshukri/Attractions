@@ -101,22 +101,26 @@ public class ReviewDbRepos
         return ret;
     }
 
-    public async Task<IReview> DeleteReviewAsync(Guid id)
+    public async Task<ResponseItemDto<IReview>> DeleteReviewAsync(Guid id)
     {
-        //Find the instance with matching id
-        var query1 = _dbContext.Review
-            .Where(i => i.ReviewId == id);
-        var item = await query1.FirstOrDefaultAsync<DbReview>();
 
-        //If the item does not exists
-        if (item == null) throw new ArgumentException($"Item {id} is not existing");
+        var item = await _dbContext.Review
+            .Include(r => r.DbComment)
+            .FirstOrDefaultAsync(r => r.ReviewId == id);
 
-        //delete in the database model
+        if (item == null)
+            throw new ArgumentException($"Review id {id} not existing");
+
+
+        if (item.DbComment != null)
+            _dbContext.Comment.Remove(item.DbComment);
+
         _dbContext.Review.Remove(item);
 
-        //write to database in a UoW
+
         await _dbContext.SaveChangesAsync();
-        return item;
+
+        return new ResponseItemDto<IReview> { Item = item };
     }
 
     public async Task<ResponseItemDto<IReview>> CreateReviewAsync(ReviewCuDto itemDto)

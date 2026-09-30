@@ -20,7 +20,8 @@ public class AttractionDbRepos
         _dbContext = context;
     }
 
-    public async Task<ResponsePageDto<IAttraction>> ReadAttractionsAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize)
+#region Read all items
+    public async Task<ResponsePageDto<IAttraction>> ReadAttractionsAsync(bool seeded, bool flat, bool? hasReviews, string filter, int pageNumber, int pageSize)
     {
         filter ??= "";
         IQueryable<DbAttraction> query;
@@ -28,20 +29,23 @@ public class AttractionDbRepos
         if (flat)
         {
             // Create query without navigation properties
-            query = _dbContext.Attraction.AsNoTracking();
+            query = _dbContext.Attraction.AsNoTracking()
+            .Include(i => i.DbCategories)
+            .Include(i => i.DbAddress);
+
         }
         else
         {
             // Create query with all navigation properties included
             query = _dbContext.Attraction.AsNoTracking()
+                .Include(i => i.DbCategories)
                 .Include(i => i.DbReviews)
                     .ThenInclude(u => u.DbUser)
-                .Include(i => i.DbCategories)
                 .Include(i => i.DbAddress)
                     .ThenInclude(a => a.DbCity)
                 .Include(i => i.DbAddress)
                     .ThenInclude(a => a.DbCountry);
-                
+
         }
         var ret = new ResponsePageDto<IAttraction>()
         {
@@ -52,17 +56,23 @@ public class AttractionDbRepos
 
             //Adding filter functionality
             .Where(i => (i.Seeded == seeded) &&
+            (hasReviews == null || i.DbReviews.Any() == hasReviews) &&
                         (i.Name.ToLower().Contains(filter) ||
+                        i.Description.ToLower().Contains(filter) ||
                             i.DbAddress.DbCity.CityName.ToLower().Contains(filter) ||
-                            i.DbAddress.DbCountry.CountryName.ToLower().Contains(filter))).CountAsync(),
+                            i.DbAddress.DbCountry.CountryName.ToLower().Contains(filter) ||
+                             i.DbCategories.Any(c => c.Name.ToLower().Contains(filter)))).CountAsync(),
 
             PageItems = await query
 
             //Adding filter functionality
             .Where(i => (i.Seeded == seeded) &&
+            (hasReviews == null || i.DbReviews.Any() == hasReviews) &&
                         (i.Name.ToLower().Contains(filter) ||
+                        i.Description.ToLower().Contains(filter) ||
                             i.DbAddress.DbCity.CityName.ToLower().Contains(filter) ||
-                            i.DbAddress.DbCountry.CountryName.ToLower().Contains(filter)))
+                            i.DbAddress.DbCountry.CountryName.ToLower().Contains(filter) ||
+                             i.DbCategories.Any(c => c.Name.ToLower().Contains(filter))))
 
             //Adding paging
             .Skip(pageNumber * pageSize)
@@ -75,7 +85,9 @@ public class AttractionDbRepos
         };
         return ret;
     }
+#endregion
 
+#region Read one item
     public async Task<ResponseItemDto<IAttraction>> ReadAttractionAsync(Guid id, bool flat)
     {
         IQueryable<DbAttraction> query;
@@ -83,15 +95,19 @@ public class AttractionDbRepos
         if (flat)
         {
             // Create query without navigation properties
-            query = _dbContext.Attraction.AsNoTracking();
+            query = _dbContext.Attraction.AsNoTracking()
+            .Include(i => i.DbCategories)
+            .Include(i => i.DbAddress);
         }
         else
         {
             // Create query with all navigation properties included
             query = _dbContext.Attraction.AsNoTracking()
+                .Include(i => i.DbCategories)
                 .Include(i => i.DbReviews)
                     .ThenInclude(u => u.DbUser)
-                .Include(i => i.DbCategories)
+                .Include(i => i.DbReviews)
+                    .ThenInclude(u => u.DbComment)
                 .Include(i => i.DbAddress)
                     .ThenInclude(a => a.DbCity)
                 .Include(i => i.DbAddress)
@@ -110,25 +126,36 @@ public class AttractionDbRepos
         };
         return ret;
     }
+#endregion
 
-    public async Task<IAttraction> DeleteAttractionAsync(Guid id)
+#region Delete item
+    public async Task<ResponseItemDto<IAttraction>> DeleteAttractionAsync(Guid id)
     {
-        //Find the instance with matching id
-        var query1 = _dbContext.Attraction
-            .Where(i => i.AttractionId == id);
-        var item = await query1.FirstOrDefaultAsync<DbAttraction>();
+        var item = await _dbContext.Attraction
+            .Include(a => a.DbReviews)
+                .ThenInclude(r => r.DbComment)
+            .Include(a => a.DbCategories)
+            .FirstOrDefaultAsync(a => a.AttractionId == id);
 
-        //If the item does not exists
-        if (item == null) throw new ArgumentException($"Item {id} is not existing");
+        if (item == null)
+            throw new ArgumentException($"Attraction id {id} not existing");
 
-        //delete in the database model
+        var comments = item.DbReviews
+            .Where(r => r.DbComment != null)
+            .Select(r => r.DbComment)
+            .ToList();
+
+        _dbContext.Comment.RemoveRange(comments);
+        _dbContext.Review.RemoveRange(item.DbReviews);
         _dbContext.Attraction.Remove(item);
 
-        //write to database in a UoW
         await _dbContext.SaveChangesAsync();
-        return item;
-    }
 
+        return new ResponseItemDto<IAttraction> { Item = item };
+    }
+#endregion
+
+#region Create item
     public async Task<ResponseItemDto<IAttraction>> CreateAttractionAsync(AttractionCuDto itemDto)
     {
         // 1. Validate that AttractionId is null
@@ -148,7 +175,9 @@ public class AttractionDbRepos
         // 5. Return fully populated item
         return await ReadAttractionAsync(item.AttractionId, false);
     }
+#endregion
 
+#region Navigation Properties CuDto
     private async Task navProp_AttractionCUdto_to_AttractionDbM(AttractionCuDto itemDtoSrc, DbAttraction itemDst)
     {
 
@@ -165,17 +194,6 @@ public class AttractionDbRepos
         }
 
         // Multiple relationships
-        if (itemDtoSrc.ReviewsId != null)
-        {
-            var reviews = new List<DbReview>();
-            foreach (var id in itemDtoSrc.ReviewsId)
-            {
-                var p = await _dbContext.Review.FirstOrDefaultAsync(i => i.ReviewId == id);
-                if (p == null) throw new ArgumentException($"Review id {id} not existing");
-                reviews.Add(p);
-            }
-            itemDst.DbReviews = reviews;
-        }
 
         if (itemDtoSrc.CategoriesId != null)
         {
@@ -188,10 +206,10 @@ public class AttractionDbRepos
             }
             itemDst.DbCategories = categories;
         }
-
-        // Multiple relationships (Quotes) - similar pattern
     }
+#endregion
 
+#region Update item
     public async Task<ResponseItemDto<IAttraction>> UpdateAttractionAsync(AttractionCuDto itemDto)
     {
         //Find the instance with matching id and read the navigation properties.
@@ -222,4 +240,5 @@ public class AttractionDbRepos
         //return the updated item in non-flat mode
         return await ReadAttractionAsync(item.AttractionId, false);
     }
+    #endregion
 }

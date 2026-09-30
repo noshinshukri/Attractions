@@ -21,21 +21,22 @@ namespace AppWebApi.Controllers
         [ActionName("Read")]
         [ProducesResponseType(200, Type = typeof(ResponsePageDto<IAttraction>))]
         [ProducesResponseType(400, Type = typeof(string))]
-        public async Task<IActionResult> Read(string seeded = "true", string flat = "true",
+        public async Task<IActionResult> Read(string seeded = "true", string flat = "true", string hasReviews = "",
             string filter = null, string pageNr = "0", string pageSize = "10")
         {
             try
             {
                 bool seededArg = bool.Parse(seeded);
                 bool flatArg = bool.Parse(flat);
+                bool? hasReviewsArg = string.IsNullOrWhiteSpace(hasReviews) ? null : bool.Parse(hasReviews);
                 int pageNrArg = int.Parse(pageNr);
                 int pageSizeArg = int.Parse(pageSize);
 
-                 _logger.LogInformation($"{nameof(Read)}: {nameof(seededArg)}: {seededArg}, {nameof(flatArg)}: {flatArg}, " +
-                    $"{nameof(pageNrArg)}: {pageNrArg}, {nameof(pageSizeArg)}: {pageSizeArg}");
+                _logger.LogInformation($"{nameof(Read)}: {nameof(seededArg)}: {seededArg}, {nameof(flatArg)}: {flatArg}, {nameof(hasReviewsArg)}: {hasReviews}, " +
+                   $"{nameof(pageNrArg)}: {pageNrArg}, {nameof(pageSizeArg)}: {pageSizeArg}");
 
-                var resp = await _service.ReadAttractionsAsync(seededArg, flatArg, filter?.Trim().ToLower(), pageNrArg, pageSizeArg);     
-                return Ok(resp);     
+                var resp = await _service.ReadAttractionsAsync(seededArg, flatArg, hasReviewsArg, filter?.Trim().ToLower(), pageNrArg, pageSizeArg);
+                return Ok(resp);
             }
             catch (Exception ex)
             {
@@ -44,10 +45,10 @@ namespace AppWebApi.Controllers
             }
         }
 
-                //GET: api/Attraction/readitem
+        //GET: api/Attraction/readitem
         [HttpGet()]
         [ActionName("ReadItem")]
-        [ProducesResponseType(200, Type = typeof(IAttraction))]
+        [ProducesResponseType(200, Type = typeof(AttractionCuDto))]
         [ProducesResponseType(400, Type = typeof(string))]
         [ProducesResponseType(404, Type = typeof(string))]
         public async Task<IActionResult> ReadItem(string id = null, string flat = "false")
@@ -60,10 +61,10 @@ namespace AppWebApi.Controllers
                 _logger.LogInformation($"{nameof(ReadItem)}: {nameof(idArg)}: {idArg}, {nameof(flatArg)}: {flatArg}");
 
                 var item = await _service.ReadAttractionAsync(idArg, flatArg);
-                if (item == null) throw new ArgumentException ($"Item with id {id} does not exist");
+                if (item == null) throw new ArgumentException($"Item with id {id} does not exist");
 
-                
-                return Ok(item);         
+
+                return Ok(item);
             }
             catch (Exception ex)
             {
@@ -72,7 +73,7 @@ namespace AppWebApi.Controllers
             }
         }
 
-                //POST: api/Attractions/createitem
+        //POST: api/Attractions/createitem
         //Body: csAttractionCUdto in Json
         [HttpPost()]
         [ActionName("CreateItem")]
@@ -83,11 +84,11 @@ namespace AppWebApi.Controllers
             try
             {
                 _logger.LogInformation($"{nameof(CreateItem)}:");
-                
+
                 var _item = await _service.CreateAttractionAsync(item);
                 _logger.LogInformation($"item {_item.Item.AttractionId} created");
 
-                return Ok(_item);       
+                return Ok(_item);
             }
             catch (Exception ex)
             {
@@ -96,7 +97,7 @@ namespace AppWebApi.Controllers
             }
         }
 
-                //PUT: api/Attractions/updateitem/id
+        //PUT: api/Attractions/updateitem/id
         //Body: csAttractionCUdto in Json
         [HttpPut("{id}")]
         [ActionName("UpdateItem")]
@@ -109,13 +110,13 @@ namespace AppWebApi.Controllers
                 var idArg = Guid.Parse(id);
 
                 _logger.LogInformation($"{nameof(UpdateItem)}: {nameof(idArg)}: {idArg}");
-                
+
                 if (item.AttractionId != idArg) throw new ArgumentException("Id mismatch");
 
                 var _item = await _service.UpdateAttractionAsync(item);
                 _logger.LogInformation($"item {idArg} updated");
-               
-                return Ok(_item);             
+
+                return Ok(_item);
             }
             catch (Exception ex)
             {
@@ -123,7 +124,7 @@ namespace AppWebApi.Controllers
                 return BadRequest($"Could not update. Error {ex.Message}");
             }
         }
-        
+
         //DELETE: api/Attraction/deleteitem/id
         [HttpDelete("{id}")]
         [ActionName("DeleteItem")]
@@ -138,7 +139,7 @@ namespace AppWebApi.Controllers
                 _logger.LogInformation($"{nameof(DeleteItem)}: {nameof(idArg)}: {idArg}");
 
                 var item = await _service.DeleteAttractionAsync(idArg);
-                if (item == null) throw new ArgumentException ($"Item with id {id} does not exist");
+                if (item == null) throw new ArgumentException($"Item with id {id} does not exist");
 
                 _logger.LogInformation($"item {idArg} deleted");
                 return Ok(item);

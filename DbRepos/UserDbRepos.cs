@@ -20,7 +20,7 @@ public class UserDbRepos
         _dbContext = context;
     }
 
-
+    #region Read all items
     public async Task<ResponsePageDto<IUser>> ReadUsersAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize)
     {
         filter ??= "";
@@ -35,7 +35,10 @@ public class UserDbRepos
         {
             // Create query with all navigation properties included
             query = _dbContext.User.AsNoTracking()
-                .Include(i => i.DbReviews);
+                .Include(i => i.DbReviews)
+                .ThenInclude(i => i.DbComment)
+                .Include(i => i.DbReviews)
+                .ThenInclude(i => i.DbAttraction);
         }
         var ret = new ResponsePageDto<IUser>()
         {
@@ -67,7 +70,9 @@ public class UserDbRepos
         };
         return ret;
     }
+    #endregion
 
+    #region Read one item
     public async Task<ResponseItemDto<IUser>> ReadUserAsync(Guid id, bool flat)
     {
         IQueryable<DbUser> query;
@@ -81,7 +86,10 @@ public class UserDbRepos
         {
             // Create query with all navigation properties included
             query = _dbContext.User.AsNoTracking()
-                .Include(i => i.DbReviews);
+                .Include(i => i.DbReviews)
+                .ThenInclude(i => i.DbComment)
+                .Include(i => i.DbReviews)
+                .ThenInclude(i => i.DbAttraction);
         }
 
         // Find the C by ID and return
@@ -96,25 +104,35 @@ public class UserDbRepos
         };
         return ret;
     }
+    #endregion
 
-    public async Task<IUser> DeleteUserAsync(Guid id)
+    #region Delete item
+    public async Task<ResponseItemDto<IUser>> DeleteUserAsync(Guid id)
     {
-        //Find the instance with matching id
-        var query1 = _dbContext.User
-            .Where(i => i.UserId == id);
-        var item = await query1.FirstOrDefaultAsync<DbUser>();
+        var item = await _dbContext.User
+            .Include(u => u.DbReviews)
+                .ThenInclude(r => r.DbComment)
+            .FirstOrDefaultAsync(u => u.UserId == id);
 
-        //If the item does not exists
-        if (item == null) throw new ArgumentException($"Item {id} is not existing");
+        if (item == null)
+            throw new ArgumentException($"User id {id} not existing");
 
-        //delete in the database model
+        var comments = item.DbReviews
+            .Where(r => r.DbComment != null)
+            .Select(r => r.DbComment)
+            .ToList();
+
+        _dbContext.Comment.RemoveRange(comments);
+        _dbContext.Review.RemoveRange(item.DbReviews);
         _dbContext.User.Remove(item);
 
-        //write to database in a UoW
         await _dbContext.SaveChangesAsync();
-        return item;
-    }
 
+        return new ResponseItemDto<IUser> { Item = item };
+    }
+    #endregion
+
+    #region Create item
     public async Task<ResponseItemDto<IUser>> CreateUserAsync(UserCuDto itemDto)
     {
         // 1. Validate that UserId is null
@@ -124,9 +142,6 @@ public class UserDbRepos
         // 2. Create new database entity from DTO
         var item = new DbUser(itemDto);
 
-        // 3. Update navigation properties
-        await navProp_UserCUdto_to_UserDbM(itemDto, item);
-
         // 4. Add to context and save
         _dbContext.User.Add(item);
         await _dbContext.SaveChangesAsync();
@@ -134,32 +149,21 @@ public class UserDbRepos
         // 5. Return fully populated item
         return await ReadUserAsync(item.UserId, false);
     }
+    #endregion
 
+    #region Navigation Properties CuDto
     private async Task navProp_UserCUdto_to_UserDbM(UserCuDto itemDtoSrc, DbUser itemDst)
     {
-        // Multiple relationships (Pets)
-        if (itemDtoSrc.ReviewsId != null)
-        {
-            var reviews = new List<DbReview>();
-            foreach (var id in itemDtoSrc.ReviewsId)
-            {
-                var p = await _dbContext.Review.FirstOrDefaultAsync(i => i.ReviewId == id);
-                if (p == null) throw new ArgumentException($"Review id {id} not existing");
-                reviews.Add(p);
-            }
-            itemDst.DbReviews = reviews;
-        }
-
-        // Multiple relationships (Quotes) - similar pattern
+        // Multiple relationships
     }
+    #endregion
 
+    #region Update item
     public async Task<ResponseItemDto<IUser>> UpdateUserAsync(UserCuDto itemDto)
     {
         //Find the instance with matching id and read the navigation properties.
-        var query1 = _dbContext.User
-            .Where(i => i.UserId == itemDto.UserId);
-        var item = await query1
-            .Include(i => i.DbReviews)
+        var item = await _dbContext.User
+            .Where(i => i.UserId == itemDto.UserId)
             .FirstOrDefaultAsync<DbUser>();
 
         //If the item does not exists
@@ -169,8 +173,6 @@ public class UserDbRepos
         //Update individual properties
         item.UpdateFromDTO(itemDto);
 
-        //Update navigation properties
-        await navProp_UserCUdto_to_UserDbM(itemDto, item);
 
         //write to database model
         _dbContext.User.Update(item);
@@ -181,4 +183,5 @@ public class UserDbRepos
         //return the updated item in non-flat mode
         return await ReadUserAsync(item.UserId, false);
     }
+    #endregion
 }

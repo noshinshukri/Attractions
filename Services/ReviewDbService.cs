@@ -23,7 +23,7 @@ public class ReviewDbService : IReviewService
 
     public Task<ResponsePageDto<IReview>> ReadReviewsAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize) => _repo.ReadReviewsAsync(seeded, flat, filter, pageNumber, pageSize);
     public Task<ResponseItemDto<IReview>> ReadReviewAsync(Guid id, bool flat) => _repo.ReadReviewAsync(id, flat);
-    public Task<IReview> DeleteReviewAsync(Guid id) => _repo.DeleteReviewAsync(id);
+    public Task<ResponseItemDto<IReview>> DeleteReviewAsync(Guid id) => _repo.DeleteReviewAsync(id);
 
     public Task<ResponseItemDto<IReview>> UpdateReviewAsync(ReviewCuDto item) => _repo.UpdateReviewAsync(item);
     public Task<ResponseItemDto<IReview>> CreateReviewAsync(ReviewCuDto item) => _repo.CreateReviewAsync(item);

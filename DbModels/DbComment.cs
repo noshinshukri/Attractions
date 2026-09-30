@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Seido.Utilities.SeedGenerator;
 
 using Models;
+using Models.DTO;
 
 namespace DbModels;
 
@@ -23,6 +24,20 @@ public sealed class DbComment : Comment, ISeed<DbComment>
     {
         base.Seed(seedGenerator);
         return this;
+    }
+
+    public DbComment() { }
+
+    public DbComment UpdateFromDTO(CommentCuDto org)
+    {
+        CommentText = org.CommentText;
+        return this;
+    }
+
+    public DbComment(CommentCuDto org)
+    {
+        CommentId = Guid.NewGuid();
+        UpdateFromDTO(org);
     }
 
 }
