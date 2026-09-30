@@ -20,7 +20,7 @@ public class ReviewDbRepos
         _dbContext = context;
     }
 
-
+    #region Read all items
     public async Task<ResponsePageDto<IReview>> ReadReviewsAsync(bool seeded, bool flat, string filter, int pageNumber, int pageSize)
     {
         filter ??= "";
@@ -69,7 +69,9 @@ public class ReviewDbRepos
         };
         return ret;
     }
+    #endregion
 
+    #region Read item
     public async Task<ResponseItemDto<IReview>> ReadReviewAsync(Guid id, bool flat)
     {
         IQueryable<DbReview> query;
@@ -100,7 +102,9 @@ public class ReviewDbRepos
         };
         return ret;
     }
+    #endregion
 
+    #region Delete item
     public async Task<ResponseItemDto<IReview>> DeleteReviewAsync(Guid id)
     {
 
@@ -122,7 +126,9 @@ public class ReviewDbRepos
 
         return new ResponseItemDto<IReview> { Item = item };
     }
+    #endregion
 
+    #region Create item
     public async Task<ResponseItemDto<IReview>> CreateReviewAsync(ReviewCuDto itemDto)
     {
         // 1. Validate that ReviewId is null
@@ -142,7 +148,9 @@ public class ReviewDbRepos
         // 5. Return fully populated item
         return await ReadReviewAsync(item.ReviewId, false);
     }
+    #endregion
 
+    #region Navigation property CuDto
     private async Task navProp_ReviewCUdto_to_ReviewDbM(ReviewCuDto itemDtoSrc, DbReview itemDst)
     {
         // Attraction not nullable
@@ -186,7 +194,9 @@ public class ReviewDbRepos
             itemDst.DbComment = null;
         }
     }
+    #endregion
 
+    #region Update item
     public async Task<ResponseItemDto<IReview>> UpdateReviewAsync(ReviewCuDto itemDto)
     {
         //Find the instance with matching id and read the navigation properties.
@@ -217,4 +227,5 @@ public class ReviewDbRepos
         //return the updated item in non-flat mode
         return await ReadReviewAsync(item.ReviewId, false);
     }
+    #endregion
 }

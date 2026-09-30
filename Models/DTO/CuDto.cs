@@ -9,8 +9,6 @@ public class UserCuDto
     public string UserName { get; set; }
     public string Email { get; set; }
 
-    public List<Guid> ReviewsId { get; set; } = null;
-
     public UserCuDto() { }
 
     public UserCuDto(IUser org)

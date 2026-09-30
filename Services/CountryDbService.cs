@@ -14,8 +14,6 @@ public class CountryDbService : ICountryService
     private readonly CountryDbRepos _repo = null;
     private readonly ILogger<CountryDbService> _logger = null;
 
-    private readonly MainDbContext _dbContext;
-
     public CountryDbService(CountryDbRepos repo)
     {
         _repo = repo;

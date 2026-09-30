@@ -1,51 +1,129 @@
-📘 Seido AB Course Repository
+# TravelApi / AppWebApi
 
-Welcome to the official repository for a course taught by Seido AB. This repository contains educational materials, starter code, and possibly a designated template branch, named seido-template, for student projects.
+## Hur C#-klasserna för databastabellerna är uppbyggda
 
-🚀 Purpose
+Jag har byggt upp databastabellerna i tre delar:
 
-This repository is intended for use by students enrolled in Seido AB courses. It provides:
+### 1. Interface
 
-• Learning materials and example code
-• It may include a branch named seido-template for starting your own project
-• Guidance on permitted usage and licensing
+Till exempel `IAttraction`, `IUser` och `IReview`.
 
+Interfacet beskriver vilka properties och relationer objektet ska ha. Det gör att resten av programmet kan jobba mot interfacet istället för direkt mot databasklassen.
 
-📂 Branches
+### 2. Modellklass
 
-This repository may contain several branches, each serving a different purpose.
-Only one branch, named seido-template, is designated as the template branch for student use in creating derivative projects.
+Till exempel `Attraction`, `User` och `Review`.
 
-• All branches: Internal, experimental, or instructional code not permitted for commerical reuse without written approval
-• seido-template: The only branch students may use to start their own projects (see license terms below)
+Modellklassen implementerar interfacet och innehåller den vanliga C#-logiken. Här finns till exempel `Seed()` som används för att skapa testdata.
 
+OBS! Reviews är kommentarer som uppgiften efterfrågar. Varje attraktion kan han mellan 0 - 20 reviews och varje review kan ha en eller ingen kommentar.
 
-📜 License Summary
+### 3. Db-klass
 
-This repository is licensed under the Seido AB Educational License Agreement. Key points:
+Till exempel `DbAttraction`, `DbUser` och `DbReview`.
 
-• Students enrolled in Seido AB courses may use the code for their own educational purposes.
-• If it exists, only the seido-template branch may be used to create derivative projects for educational and commercial use, with required attribution.
-• All other usage, including use of other branches, requires written permission from Seido AB.
-• All rights, including copyright and IP, remain with Seido AB.
+Db-klassen ärver från modellklassen och innehåller det som EF Core behöver för att koppla modellen till databasen. Här finns bland annat `[Key]` och navigation properties till andra tabeller.
 
+Relationerna till andra tabeller ligger i `Db`-klassen, till exempel `DbReviews`, `DbAddress` och `DbCategories`.
 
-For full terms, see LICENSE.txt.
+De vanliga properties som `Reviews`, `Address` och `Categories` är istället `[NotMapped]` och pekar vidare till `Db`-versionerna. På så sätt kan resten av programmet använda de vanliga properties utan att behöva tänka på hur EF Core hanterar databasen.
 
-📝 Attribution Requirement
+Jag använder även `[JsonIgnore]` på vissa navigation properties. Det gör att vi slipper cirkulära referenser när objekten skickas som JSON. Till exempel att en `Review` hämtar sin `User`, som sedan hämtar alla sina `Reviews` igen.
 
-If you use the seido-template branch to build your own project, whether for school, portfolio, or commercial purposes, you must include the following attribution:
+### Seeded
 
-“This project was initiated using a template provided by Seido AB as part of their course curriculum. All original template code © Seido AB. Learn more about Seido AB and our educational programs at https://seido.se”
+Varje tabell har även en `Seeded`-flagga.
 
-You may include this in your project’s README, documentation, or source code header.
+Den visar om datan är skapad automatiskt som testdata eller om den har lagts in via API:et.
 
-🌐 About Seido AB
+Det gör att vi till exempel kan ta bort seedad testdata utan att ta bort riktig data.
 
-Learn more about Seido AB and our educational programs at https://seido.se
+### DTO
 
-📧 Contact
+Jag använder även separata DTO-klasser för Create och Update.
 
-For licensing inquiries or permission requests, please contact:
-Seido AB
-📨 info@seido.se
+API:et skickar alltså inte ut själva `Db`-objekten direkt. Istället används DTO:er som bara innehåller de fält som klienten ska kunna skapa eller ändra.
+
+För relationer skickas till exempel ett `Guid` istället för hela objektet.
+
+På det här sättet blir det en tydlig uppdelning mellan **modell, databas och API**. Databasspecifika saker ligger i `Db`-klasserna medan resten av applikationen kan jobba med modeller och interfaces.
+
+---
+
+# Skapa och starta AppWebApi
+
+## 1. Skapa databasen
+
+Öppna en Terminal i mappen `_scripts` och kör kommandot för den databas du vill använda.
+
+### macOS
+
+```bash
+./database-rebuild-all.sh sql-attractions sqlserver docker root ../AppWebApi
+./database-rebuild-all.sh sql-attractions mysql docker root ../AppWebApi
+./database-rebuild-all.sh sql-attractions postgresql docker root ../AppWebApi
+```
+
+### Windows
+
+```powershell
+.\database-rebuild-all.ps1 sql-attractions sqlserver docker root ..\AppWebApi
+.\database-rebuild-all.ps1 sql-attractions mysql docker root ..\AppWebApi
+.\database-rebuild-all.ps1 sql-attractions postgresql docker root ..\AppWebApi
+```
+
+Kontrollera att det inte blir några fel när databasen byggs, migrationerna körs och databasen uppdateras.
+
+## 2. Anslut till databasen
+
+Öppna **Azure Data Studio** och anslut till databasen.
+
+Connection string finns i **User Secrets**.
+
+Vilken connection string som används beror på vilken databas som körs.
+
+Exempel:
+
+```text
+sql-attractions.sqlserver.docker.root
+```
+
+## 3. Starta AppWebApi
+
+Öppna en Terminal i mappen `AppWebApi`.
+
+Starta projektet med:
+
+```bash
+dotnet run -lp https
+```
+
+Öppna sedan Swagger:
+
+```text
+https://localhost:7066/swagger
+```
+
+Testa att endpoints fungerar genom att köra:
+
+* `Admin/Environment`
+* `Admin/Version`
+* `Admin/Log`
+
+## 4. Kontrollera databasen
+
+Använd **Azure Data Studio** för att titta på databasen och dess struktur.
+
+Kontrollera vilka tabeller som har skapats och hur de är kopplade till varandra.
+
+## 5. Skapa seed-data
+
+Använd endpointen:
+
+```text
+Admin/Seed
+```
+
+Den fyller databasen med testdata.
+
+Kontrollera sedan i **Azure Data Studio** att datan har skapats och finns i tabellerna.

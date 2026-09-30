@@ -1,94 +1,125 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using Seido.Utilities.SeedGenerator;
+using MySqlConnector;
+using Npgsql;
+using System.Data;
+using System.Data.Common;
+
 using DbModels;
 using DbContext;
 using Configuration;
 using Models;
 using Models.DTO;
+using Microsoft.Data.SqlClient;
 
 namespace DbRepos;
 
 public class AdminDbRepos
 {
+    #region Fields
     private const string _seedSource = "./app-seeds.json";
     private readonly ILogger<AdminDbRepos> _logger;
     private readonly Encryptions _encryptions;
     private readonly MainDbContext _dbContext;
-    /*
-        public async Task<ResponseItemDto<GstUsrInfoAllDto>> SeedAsync(int nrItems)
-        {
-            var safeCount = Math.Max(1, nrItems);
+    #endregion
 
-            _dbContext.Attraction.RemoveRange(_dbContext.Attraction);
-
-            var attractions = Enumerable.Range(1, safeCount)
-                .Select(i => new DbAttraction
-                {
-                    AttractionId = Guid.NewGuid(),
-                    Name = $"Attraction {i}"
-                })
-                .ToList();
-
-            _dbContext.Attraction.AddRange(attractions);
-            await _dbContext.SaveChangesAsync();
-
-            return await InfoAsync();
-        }
-    */
+    #region Constructor
     public AdminDbRepos(ILogger<AdminDbRepos> logger, Encryptions encryptions, MainDbContext context)
     {
         _logger = logger;
         _encryptions = encryptions;
         _dbContext = context;
     }
+    #endregion
 
+    #region Database Information
     public async Task<ResponseItemDto<GstUsrInfoAllDto>> InfoAsync() => await DbInfo();
 
-    private async Task<ResponseItemDto<GstUsrInfoAllDto>> DbInfo()
+    public async Task<ResponseItemDto<GstUsrInfoAllDto>> DbInfo()
     {
-        var info = new GstUsrInfoAllDto();
-        info.Db = new GstUsrInfoDbDto
+        var connection = _dbContext.Database.GetDbConnection();
+        if (connection.State != ConnectionState.Open)
+            await connection.OpenAsync();
+
+        GstUsrInfoDbDto dbInfo = null;
+        using (var command = connection.CreateCommand())
         {
-            NrSeededAttraction = await _dbContext.Attraction.Where(c => c.Seeded).CountAsync(),
-            NrUnseededAttractions = await _dbContext.Attraction.Where(c => !c.Seeded).CountAsync(),
+            command.CommandText = "SELECT * FROM dbo.vwInfoDb";
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                dbInfo = new GstUsrInfoDbDto
+                {
+                    NrSeededUsers = Convert.ToInt32(reader["NrSeededUsers"]),
+                    NrUnseededUsers = Convert.ToInt32(reader["NrUnseededUsers"]),
+                    NrSeededAttraction = Convert.ToInt32(reader["NrSeededAttraction"]),
+                    NrUnseededAttractions = Convert.ToInt32(reader["NrUnseededAttractions"]),
+                    NrSeededAddresses = Convert.ToInt32(reader["NrSeededAddresses"]),
+                    NrUnseededAddresses = Convert.ToInt32(reader["NrUnseededAddresses"]),
+                    NrSeededCities = Convert.ToInt32(reader["NrSeededCities"]),
+                    NrUnseededCities = Convert.ToInt32(reader["NrUnseededCities"]),
+                    NrSeededCountries = Convert.ToInt32(reader["NrSeededCountries"]),
+                    NrUnseededCountries = Convert.ToInt32(reader["NrUnseededCountries"]),
+                    NrSeededComments = Convert.ToInt32(reader["NrSeededComments"]),
+                    NrUnseededComments = Convert.ToInt32(reader["NrUnseededComments"]),
+                    NrSeededReviews = Convert.ToInt32(reader["NrSeededReviews"]),
+                    NrUnseededReviews = Convert.ToInt32(reader["NrUnseededReviews"]),
+                    NrSeededCategories = Convert.ToInt32(reader["NrSeededCategories"]),
+                    NrUnseededCategories = Convert.ToInt32(reader["NrUnseededCategories"])
+                };
+            }
+        }
 
-            NrSeededAddresses = await _dbContext.Address.Where(c => c.Seeded).CountAsync(),
-            NrUnseededAddresses = await _dbContext.Address.Where(c => !c.Seeded).CountAsync(),
+        var attractions = new List<GstUsrInfoAttractionsDto>();
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "SELECT * FROM dbo.vwInfoAttractions";
+            using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                attractions.Add(new GstUsrInfoAttractionsDto
+                {
+                    Country = reader["Country"] as string,
+                    City = reader["City"] as string,
+                    NrAttractions = Convert.ToInt32(reader["NrAttractions"])
+                });
+            }
+        }
 
-            NrSeededCities = await _dbContext.City.Where(c => c.Seeded).CountAsync(),
-            NrUnseededCities = await _dbContext.City.Where(c => !c.Seeded).CountAsync(),
+        var reviews = new List<GstUsrInfoReviewsDto>();
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "SELECT * FROM dbo.vwInfoReviews";
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                reviews.Add(new GstUsrInfoReviewsDto
+                {
+                    NrReviews = Convert.ToInt32(reader["NrReviews"]),
+                    NrComments = Convert.ToInt32(reader["NrComments"])
+                });
+            }
+        }
 
-            NrSeededCountries = await _dbContext.Country.Where(c => c.Seeded).CountAsync(),
-            NrUnseededCountries = await _dbContext.Country.Where(c => !c.Seeded).CountAsync(),
-
-            NrSeededComments = await _dbContext.Comment.Where(c => c.Seeded).CountAsync(),
-            NrUnseededComments = await _dbContext.Comment.Where(c => !c.Seeded).CountAsync(),
-
-            NrSeededUsers = await _dbContext.User.Where(c => c.Seeded).CountAsync(),
-            NrUnseededUsers = await _dbContext.User.Where(c => !c.Seeded).CountAsync(),
-
-            NrSeededReviews = await _dbContext.Review.Where(c => c.Seeded).CountAsync(),
-            NrUnseededReviews = await _dbContext.Review.Where(c => !c.Seeded).CountAsync(),
-
-            NrSeededCategories = await _dbContext.Category.Where(c => c.Seeded).CountAsync(),
-            NrUnseededCategories = await _dbContext.Category.Where(c => !c.Seeded).CountAsync()
-
+        var info = new GstUsrInfoAllDto
+        {
+            Db = dbInfo,
+            Reviews = reviews,
+            Attractions = attractions
         };
-
-        info.Reviews = new List<GstUsrInfoReviewsDto>();
-        info.Attractions = new List<GstUsrInfoAttractionsDto>();
 
         return new ResponseItemDto<GstUsrInfoAllDto>
         {
 #if DEBUG
             ConnectionString = _dbContext.dbConnection,
 #endif
-
             Item = info
         };
     }
+    #endregion
 
+    #region Seed Data
     public async Task<ResponseItemDto<GstUsrInfoAllDto>> SeedAsync(int nrOfItems)
     {
         //First of all make sure the database is cleared from all seeded data
@@ -133,8 +164,8 @@ public class AdminDbRepos
             for (var attempt = 0; citiesForCountry.Count < 25 && attempt < maxCityAttempts; attempt++)
             {
                 var city = new DbCity();
-                city.DbCountry = country;   // sätt land FÖRE Seed, så Country?.CountryName är tillgängligt
-                city.Seed(seeder);          // nu väljer City() en stad från rätt lands lista
+                city.DbCountry = country; 
+                city.Seed(seeder);         
 
                 if (cityNamesForCountry.Add(city.CityName))
                 {
@@ -254,26 +285,40 @@ public class AdminDbRepos
 
         return await DbInfo();
     }
+    #endregion
 
+    #region Remove Seed Data
     public async Task<ResponseItemDto<GstUsrInfoAllDto>> RemoveSeedAsync(bool seeded)
     {
-        _dbContext.Country.RemoveRange(_dbContext.Country.Where(f => f.Seeded == seeded));
-        _dbContext.City.RemoveRange(_dbContext.City.Where(f => f.Seeded == seeded));
-        _dbContext.Address.RemoveRange(_dbContext.Address.Where(f => f.Seeded == seeded));
-        _dbContext.Attraction.RemoveRange(_dbContext.Attraction.Where(f => f.Seeded == seeded));
-        _dbContext.User.RemoveRange(_dbContext.User.Where(f => f.Seeded == seeded));
-        _dbContext.Comment.RemoveRange(_dbContext.Comment.Where(f => f.Seeded == seeded));
-        _dbContext.Review.RemoveRange(_dbContext.Review.Where(f => f.Seeded == seeded));
-        _dbContext.Category.RemoveRange(_dbContext.Category.Where(f => f.Seeded == seeded));
+        var connection = _dbContext.Database.GetDbConnection();
+        using var command = connection.CreateCommand();
+        command.CommandType = CommandType.StoredProcedure;
+        command.CommandText = "dbo.spDeleteAll";
 
+        var parameters = new List<SqlParameter>
+    {
+        new SqlParameter("seededParam", seeded),
+        new SqlParameter("nrUsersAffected", SqlDbType.Int) { Direction = ParameterDirection.Output },
+        new SqlParameter("nrAttractionsAffected", SqlDbType.Int) { Direction = ParameterDirection.Output },
+        new SqlParameter("nrAddressesAffected", SqlDbType.Int) { Direction = ParameterDirection.Output },
+        new SqlParameter("nrCitiesAffected", SqlDbType.Int) { Direction = ParameterDirection.Output },
+        new SqlParameter("nrCountriesAffected", SqlDbType.Int) { Direction = ParameterDirection.Output },
+        new SqlParameter("nrCommentsAffected", SqlDbType.Int) { Direction = ParameterDirection.Output },
+        new SqlParameter("nrReviewsAffected", SqlDbType.Int) { Direction = ParameterDirection.Output },
+        new SqlParameter("nrCategoriesAffected", SqlDbType.Int) { Direction = ParameterDirection.Output }
+    };
+        command.Parameters.AddRange(parameters.ToArray());
 
-        //LogChangeTracker();
-        await _dbContext.SaveChangesAsync();
-        //LogChangeTracker();
+        if (connection.State != ConnectionState.Open)
+            await connection.OpenAsync();
+        using var reader = await command.ExecuteReaderAsync();
+        await reader.CloseAsync();
 
         return await DbInfo();
     }
+    #endregion
 
+    #region Change Tracking Diagnostics
     private void LogChangeTracker()
     {
         foreach (var e in _dbContext.ChangeTracker.Entries())
@@ -294,4 +339,5 @@ public class AdminDbRepos
             _logger.LogInformation($"{nameof(LogChangeTracker)}: {e.Entity.GetType().Name}: {id} - {e.State}");
         }
     }
+    #endregion
 }

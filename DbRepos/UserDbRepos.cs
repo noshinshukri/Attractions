@@ -79,12 +79,12 @@ public class UserDbRepos
 
         if (flat)
         {
-            // Create query without navigation properties
+
             query = _dbContext.User.AsNoTracking();
         }
         else
         {
-            // Create query with all navigation properties included
+
             query = _dbContext.User.AsNoTracking()
                 .Include(i => i.DbReviews)
                 .ThenInclude(i => i.DbComment)
@@ -92,7 +92,7 @@ public class UserDbRepos
                 .ThenInclude(i => i.DbAttraction);
         }
 
-        // Find the C by ID and return
+
         var C = await query.FirstOrDefaultAsync(f => f.UserId == id);
 
         var ret = new ResponseItemDto<IUser>()
@@ -135,18 +135,18 @@ public class UserDbRepos
     #region Create item
     public async Task<ResponseItemDto<IUser>> CreateUserAsync(UserCuDto itemDto)
     {
-        // 1. Validate that UserId is null
+
         if (itemDto.UserId != null)
             throw new ArgumentException($"{nameof(itemDto.UserId)} must be null when creating a new object");
 
-        // 2. Create new database entity from DTO
+
         var item = new DbUser(itemDto);
 
-        // 4. Add to context and save
+
         _dbContext.User.Add(item);
         await _dbContext.SaveChangesAsync();
 
-        // 5. Return fully populated item
+
         return await ReadUserAsync(item.UserId, false);
     }
     #endregion
@@ -161,26 +161,22 @@ public class UserDbRepos
     #region Update item
     public async Task<ResponseItemDto<IUser>> UpdateUserAsync(UserCuDto itemDto)
     {
-        //Find the instance with matching id and read the navigation properties.
+
         var item = await _dbContext.User
             .Where(i => i.UserId == itemDto.UserId)
             .FirstOrDefaultAsync<DbUser>();
 
-        //If the item does not exists
+
         if (item == null) throw new ArgumentException($"Item {itemDto.UserId} is not existing");
 
-        //transfer any changes from DTO to database objects
-        //Update individual properties
+
         item.UpdateFromDTO(itemDto);
 
-
-        //write to database model
         _dbContext.User.Update(item);
 
-        //write to database in a UoW
         await _dbContext.SaveChangesAsync();
 
-        //return the updated item in non-flat mode
+
         return await ReadUserAsync(item.UserId, false);
     }
     #endregion
